@@ -6,7 +6,10 @@
 package entity;
 
 import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -23,9 +26,13 @@ public class Partner implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long partnerId;
+    @Column(nullable = false, length = 64)
     private String organisation;
+    @Enumerated(EnumType.STRING)
     private PartnerAccessRight accessRight;
+    @Column(nullable = false, length = 64, unique = true)
     private String username;
+    @Column(nullable = false, length = 64)
     private String password;
 
     public Partner() {
@@ -37,8 +44,6 @@ public class Partner implements Serializable {
         this.username = username;
         this.password = password;
     }
-
-    
 
     public Long getPartnerId() {
         return partnerId;
