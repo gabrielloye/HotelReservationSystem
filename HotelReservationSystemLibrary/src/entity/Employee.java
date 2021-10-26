@@ -1,6 +1,7 @@
 package entity;
 
 import java.io.Serializable;
+import javax.persistence.Embedded;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -8,6 +9,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import util.embeddable.Name;
 import util.enumeration.EmployeeAccessRight;
 
 @Entity
@@ -17,6 +19,8 @@ public class Employee implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long employeeId;
+    @Embedded
+    private Name name;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EmployeeAccessRight accessRight;
