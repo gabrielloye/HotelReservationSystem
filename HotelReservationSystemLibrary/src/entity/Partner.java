@@ -6,6 +6,8 @@
 package entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -13,12 +15,10 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import util.enumeration.PartnerAccessRight;
 
-/**
- *
- * @author hsien
- */
+
 @Entity
 public class Partner implements Serializable {
 
@@ -26,22 +26,25 @@ public class Partner implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long partnerId;
-    @Column(nullable = false, length = 64)
+    @Column(nullable = false, length = 64, unique = true)
     private String organisation;
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PartnerAccessRight accessRight;
-    @Column(nullable = false, length = 64, unique = true)
-    private String username;
     @Column(nullable = false, length = 64)
     private String password;
 
+    @OneToMany(mappedBy = "Partner")
+    private List<Reservation> reservations;
+    
     public Partner() {
+        this.reservations = new ArrayList<>();
     }
 
-    public Partner(String organisation, PartnerAccessRight accessRight, String username, String password) {
+    public Partner(String organisation, PartnerAccessRight accessRight, String password) {
+        this();
         this.organisation = organisation;
         this.accessRight = accessRight;
-        this.username = username;
         this.password = password;
     }
 
@@ -107,20 +110,6 @@ public class Partner implements Serializable {
     }
 
     /**
-     * @return the username
-     */
-    public String getUsername() {
-        return username;
-    }
-
-    /**
-     * @param username the username to set
-     */
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    /**
      * @return the password
      */
     public String getPassword() {
@@ -132,6 +121,20 @@ public class Partner implements Serializable {
      */
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    /**
+     * @return the reservations
+     */
+    public List<Reservation> getReservations() {
+        return reservations;
+    }
+
+    /**
+     * @param reservations the reservations to set
+     */
+    public void setReservations(List<Reservation> reservations) {
+        this.reservations = reservations;
     }
     
 }

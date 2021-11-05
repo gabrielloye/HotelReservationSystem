@@ -6,6 +6,8 @@
 package entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -14,12 +16,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.OneToMany;
 import util.embeddable.Name;
 
-/**
- *
- * @author hsien
- */
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
 public class Customer implements Serializable 
@@ -35,11 +34,16 @@ public class Customer implements Serializable
     private String email;
     @Column(nullable = false, unique = true)
     private Long mobileNum;
+    
+    @OneToMany(mappedBy = "customer")
+    private List<Reservation> reservations;
 
     public Customer() {
+        this.reservations = new ArrayList<>();
     }
 
     public Customer(Name name, String email, Long mobileNum) {
+        this();
         this.name = name;
         this.email = email;
         this.mobileNum = mobileNum;
@@ -119,6 +123,20 @@ public class Customer implements Serializable
      */
     public void setMobileNum(Long mobileNum) {
         this.mobileNum = mobileNum;
+    }
+
+    /**
+     * @return the reservations
+     */
+    public List<Reservation> getReservations() {
+        return reservations;
+    }
+
+    /**
+     * @param reservations the reservations to set
+     */
+    public void setReservations(List<Reservation> reservations) {
+        this.reservations = reservations;
     }
     
 }
