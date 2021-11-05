@@ -29,12 +29,32 @@ public class Employee implements Serializable {
     @Column(nullable = false, length = 32)
     private String password;
 
+    public Employee(Name name, EmployeeAccessRight accessRight, String username, String password)
+    {
+        this.name = name;
+        this.accessRight = accessRight;
+        this.username = username;
+        this.password = password;
+    }
+
+    public Employee()
+    {
+    }
+    
     public Long getEmployeeId() {
         return employeeId;
     }
 
     public void setEmployeeId(Long employeeId) {
         this.employeeId = employeeId;
+    }
+
+    public Name getName() {
+        return name;
+    }
+
+    public void setName(Name name) {
+        this.name = name;
     }
 
     public EmployeeAccessRight getAccessRight() {
