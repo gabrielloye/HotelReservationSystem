@@ -41,6 +41,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         {
             try
             {
+                updateRanks(newRoomType.getRoomTypeRank());
                 em.persist(newRoomType);
                 em.flush();
                 
@@ -74,7 +75,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     @Override
     public List<RoomType> retrieveAllRoomTypes()
     {
-        Query query = em.createQuery("SELECT rt FROM RoomType rt");
+        Query query = em.createQuery("SELECT rt FROM RoomType rt ORDER BY rt.roomTypeRank");
         
         return query.getResultList();
     }
@@ -99,6 +100,19 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
                 // Handle Exception here of persistence exception
                 
             }
+        }
+    }
+    
+    private void updateRanks(int newRank)
+    {
+        Query query = em.createQuery("SELECT rt FROM RoomType rt WHERE rt.roomTypeRank >= :newRank");
+        query.setParameter("newRank", newRank);
+        
+        List<RoomType> roomTypesToUpdate = query.getResultList();
+        for(RoomType roomType : roomTypesToUpdate)
+        {
+            int updatedRank = roomType.getRoomTypeRank() + 1;
+            roomType.setRoomTypeRank(updatedRank);
         }
     }
     

@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -40,6 +41,8 @@ public class RoomType implements Serializable {
     private List<String> amenities;
     @Column(nullable = false)
     private Boolean disabled;
+    @Column(nullable = false)
+    private Integer roomTypeRank; // Lowest rank = 1
     
     @OneToMany(mappedBy = "roomType")
     private List<Reservation> reservations;
@@ -57,7 +60,7 @@ public class RoomType implements Serializable {
         this.roomRates = new ArrayList<>();
     }
 
-    public RoomType(String name, String description, Integer size, List<Bed> beds, Integer capacity, List<String> amenities, Boolean disabled) {
+    public RoomType(String name, String description, Integer size, List<Bed> beds, Integer capacity, List<String> amenities, Boolean disabled, Integer roomTypeRank) {
         this();
         this.name = name;
         this.description = description;
@@ -66,6 +69,7 @@ public class RoomType implements Serializable {
         this.capacity = capacity;
         this.amenities = amenities;
         this.disabled = disabled;
+        this.roomTypeRank = roomTypeRank;
     }
 
     
@@ -240,6 +244,14 @@ public class RoomType implements Serializable {
      */
     public void setRoomRates(List<RoomRate> roomRates) {
         this.roomRates = roomRates;
+    }
+
+    public Integer getRoomTypeRank() {
+        return roomTypeRank;
+    }
+
+    public void setRoomTypeRank(Integer roomTypeRank) {
+        this.roomTypeRank = roomTypeRank;
     }
 
 }
