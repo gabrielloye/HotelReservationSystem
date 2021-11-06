@@ -2,6 +2,7 @@ package hotelreservationsystemmanagementclient;
 
 import ejb.session.stateless.EmployeeSessionBeanRemote;
 import ejb.session.stateless.PartnerSessionBeanRemote;
+import ejb.session.stateless.RoomTypeSessionBeanRemote;
 import entity.Employee;
 import java.util.Scanner;
 import util.enumeration.EmployeeAccessRight;
@@ -16,11 +17,13 @@ public class MainApp
     
     private EmployeeSessionBeanRemote employeeSessionBeanRemote;
     private PartnerSessionBeanRemote partnerSessionBeanRemote;
-       
-    public MainApp(EmployeeSessionBeanRemote employeeSessionBeanRemote, PartnerSessionBeanRemote partnerSessionBeanRemote)
+    private RoomTypeSessionBeanRemote roomTypeSessionBeanRemote;   
+    
+    public MainApp(EmployeeSessionBeanRemote employeeSessionBeanRemote, PartnerSessionBeanRemote partnerSessionBeanRemote, RoomTypeSessionBeanRemote roomTypeSessionBeanRemote)
     {
         this.employeeSessionBeanRemote = employeeSessionBeanRemote;
         this.partnerSessionBeanRemote = partnerSessionBeanRemote;
+        this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
     }
     
     public MainApp()
@@ -107,7 +110,7 @@ public class MainApp
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.OPERATIONMANAGER)
         {
-            hotelOperationModule = new HotelOperationModule();
+            hotelOperationModule = new HotelOperationModule(roomTypeSessionBeanRemote);
             hotelOperationModule.operationManagerMenu();
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.SALESMANAGER)
