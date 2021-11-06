@@ -51,11 +51,11 @@ public class Reservation implements Serializable {
     @JoinColumn(nullable = false)
     private Customer customer;
     
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true)
     @JoinColumn(nullable = true)
     private Employee employee;
     
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true)
     @JoinColumn(nullable = true)
     private Partner partner;
     

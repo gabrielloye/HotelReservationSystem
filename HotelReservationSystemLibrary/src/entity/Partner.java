@@ -34,7 +34,7 @@ public class Partner implements Serializable {
     @Column(nullable = false, length = 64)
     private String password;
 
-    @OneToMany(mappedBy = "Partner")
+    @OneToMany(mappedBy = "partner")
     private List<Reservation> reservations;
     
     public Partner() {
