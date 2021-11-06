@@ -25,8 +25,12 @@ public class DataInitSessionBean {
     {
         if(em.find(Employee.class, 1l) == null)
         {
-            Employee employee = new Employee(new Name("Hsien Jie", "Loke"), EmployeeAccessRight.SYSTEMADMINISTRATOR, "username", "password");
-            em.persist(employee);
+            Employee systemAdministrator = new Employee(new Name("Hsien Jie", "Loke"), EmployeeAccessRight.SYSTEMADMINISTRATOR, "systemadmin", "password");
+            em.persist(systemAdministrator);
+            Employee operationManager = new Employee(new Name("Gabriel", "Loye"), EmployeeAccessRight.OPERATIONMANAGER, "operationmanager", "password");
+            em.persist(operationManager);
+            Employee salesManager = new Employee(new Name("Sales", "Manager"), EmployeeAccessRight.SALESMANAGER, "salesmanager", "password");
+            em.persist(salesManager);
         }
     }
     
