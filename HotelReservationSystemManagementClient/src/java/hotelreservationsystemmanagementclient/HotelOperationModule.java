@@ -1,15 +1,28 @@
 package hotelreservationsystemmanagementclient;
 
+import ejb.session.stateless.RoomTypeSessionBeanRemote;
+import entity.RoomType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import util.enumeration.Bed;
+import util.exception.InputDataValidationException;
+import util.exception.RoomTypeExistsException;
+import util.exception.UnknownPersistenceException;
 
 
 public class HotelOperationModule
 {
+    
+    private RoomTypeSessionBeanRemote roomTypeSessionBeanRemote;
 
     public HotelOperationModule()
     {
+    }
+    
+    public HotelOperationModule(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote)
+    {
+        this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
     }
     
     public void operationManagerMenu()
@@ -132,10 +145,9 @@ public class HotelOperationModule
         String name;
         String description;
         int size;
-        // List<Bed> beds = new ArrayList<>();
+        List<Bed> beds = new ArrayList<>();
         int capacity;
         List<String> amenities = new ArrayList<>();
-        boolean disabled;
         
         System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: Room Type Creation");
         System.out.print("Enter Room Type Name> ");
@@ -158,14 +170,14 @@ public class HotelOperationModule
             
             if(bedTypeInt >= 1 && bedTypeInt <= 3)
             {
-                //Bed bedTooAdd = Bed.values()[bedTypeInt-1];
-                //beds.add(bedTooAdd);
-                //System.out.println("\nAdded: " + bedToAdd.toString());
-                //System.out.println("Beds in Room Type:");
-//                for(int i = 0; i < beds.size(); i++)
-//                {
-//                    System.out.println(i + ": " + beds.get(i).toString());
-//                }
+                Bed bedToAdd = Bed.values()[bedTypeInt-1];
+                beds.add(bedToAdd);
+                System.out.println("\nAdded: " + bedToAdd.toString());
+                System.out.println("Beds in Room Type:");
+                for(int i = 0; i < beds.size(); i++)
+                {
+                    System.out.println(i + ": " + beds.get(i).toString());
+                }
                 
                 response = 0;
                 while(response < 1 || response > 2)
@@ -220,7 +232,23 @@ public class HotelOperationModule
                 System.out.println("Invalid option, please try again!\n");
             }
         }
-        //RoomType newRoomType = new RoomType(name, description, size, beds, capacity, amenities, false);
+        RoomType newRoomType = new RoomType(name, description, size, beds, capacity, amenities, false);
+        try
+        {
+            Long newRoomTypeId = roomTypeSessionBeanRemote.createNewRoomType(newRoomType);
+        }
+        catch(RoomTypeExistsException ex)
+        {
+            System.out.println("An error has occurred while creating the new room type!: The room type with name: " + newRoomType.getName()  + " already exist\n");
+        }
+        catch(UnknownPersistenceException ex)
+        {
+            System.out.println("An unknown error has occurred while creating the new room type!: " + ex.getMessage() + "\n");
+        }
+        catch(InputDataValidationException ex)
+        {
+            System.out.println(ex.getMessage() + "\n");
+        }
     }
     
     private void roomOperationsMenu()

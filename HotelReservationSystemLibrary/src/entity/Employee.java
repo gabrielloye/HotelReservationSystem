@@ -1,6 +1,8 @@
 package entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Embedded;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,6 +11,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import util.embeddable.Name;
 import util.enumeration.EmployeeAccessRight;
 
@@ -28,19 +31,25 @@ public class Employee implements Serializable {
     private String username;
     @Column(nullable = false, length = 32)
     private String password;
+    
+    @OneToMany(mappedBy = "employee")
+    private List<Reservation> reservations;
+
+    public Employee()
+    {
+        this.reservations = new ArrayList<>();
+    }
 
     public Employee(Name name, EmployeeAccessRight accessRight, String username, String password)
     {
+        this();
+
         this.name = name;
         this.accessRight = accessRight;
         this.username = username;
         this.password = password;
     }
 
-    public Employee()
-    {
-    }
-    
     public Long getEmployeeId() {
         return employeeId;
     }
@@ -104,6 +113,20 @@ public class Employee implements Serializable {
     @Override
     public String toString() {
         return "entity.Employee[ id=" + employeeId + " ]";
+    }
+
+    /**
+     * @return the reservations
+     */
+    public List<Reservation> getReservations() {
+        return reservations;
+    }
+
+    /**
+     * @param reservations the reservations to set
+     */
+    public void setReservations(List<Reservation> reservations) {
+        this.reservations = reservations;
     }
     
 }

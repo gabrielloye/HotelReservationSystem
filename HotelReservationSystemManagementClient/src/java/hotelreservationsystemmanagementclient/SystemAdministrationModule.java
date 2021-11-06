@@ -196,7 +196,7 @@ public class SystemAdministrationModule
         System.out.print("Enter Password> ");
         password = scanner.nextLine().trim();
         
-        Partner newPartner = new Partner(organisation, accessRight, "", password);
+        Partner newPartner = new Partner(organisation, accessRight, password);
         
         try
         {
