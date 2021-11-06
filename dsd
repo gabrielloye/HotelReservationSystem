@@ -1,0 +1,57 @@
+[33mcommit 88453e6f264a656a0a6e2aeb5e9746c414932855[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: ecde528 e2365d4
+Author: Gabriel Loye <46185613+gabrielloye@users.noreply.github.com>
+Date:   Tue Oct 26 19:48:12 2021 +0800
+
+    Merge pull request #3 from gabrielloye/entities
+    
+    Entities added, RoomType incomplete
+
+[33mcommit e2365d42dd69b6288d85694fc280bea5102738b2[m[33m ([m[1;31morigin/entities[m[33m, [m[1;32mentities[m[33m)[m
+Merge: 47ace1a ecde528
+Author: Gabriel Loye <46185613+gabrielloye@users.noreply.github.com>
+Date:   Tue Oct 26 19:48:02 2021 +0800
+
+    Merge branch 'master' into entities
+
+[33mcommit ecde5282e70d2c7f2822c7d1758ceac93ba712e8[m
+Merge: 7d766eb 2633642
+Author: lokehsienjie <78008592+lokehsienjie@users.noreply.github.com>
+Date:   Tue Oct 26 19:46:08 2021 +0800
+
+    Merge pull request #2 from gabrielloye/managementclient
+    
+    Added login prompts, access right enum and management module control …
+
+[33mcommit 47ace1a4f21249325427d5f7604fea6e11f3606e[m
+Author: lokehsienjie <loke.hj@u.nus.edu>
+Date:   Tue Oct 26 19:42:58 2021 +0800
+
+    Entities added, RoomType incomplete
+
+[33mcommit 26336424e9b042568e5b81e3065e02e725fa4331[m[33m ([m[1;31morigin/managementclient[m[33m)[m
+Author: Gabriel Loye <gabrielloye@hotmail.com>
+Date:   Tue Oct 26 19:13:07 2021 +0800
+
+    Added login prompts, access right enum and management module control flow
+
+[33mcommit 7d766ebd0f7071de39f338ad2383847a31f173f9[m
+Merge: 8e82e19 4eec8af
+Author: Gabriel Loye <46185613+gabrielloye@users.noreply.github.com>
+Date:   Tue Oct 26 16:40:36 2021 +0800
+
+    Merge pull request #1 from gabrielloye/entities
+    
+    Partner Entity added
+
+[33mcommit 4eec8afb2b030f7dbfe3fd46b72a44d59f3a83d5[m[33m ([m[1;32mlist[m[33m)[m
+Author: lokehsienjie <loke.hj@u.nus.edu>
+Date:   Tue Oct 26 16:34:49 2021 +0800
+
+    Partner Entity added
+
+[33mcommit 8e82e19d100aae8176c86b06bb6fc1d5dcb0bdf6[m
+Author: Gabriel Loye <gabrielloye@hotmail.com>
+Date:   Sat Oct 16 10:57:50 2021 +0800
+
+    Initial Setup
