@@ -10,8 +10,12 @@ import util.exception.UnknownPersistenceException;
 @Local
 public interface RoomTypeSessionBeanLocal {
 
-    public Long createNewRoomType(RoomType newRoomType) throws RoomTypeExistsException, UnknownPersistenceException, InputDataValidationException;
+    public Long createNewRoomType(RoomType newRoomType, Long lowerRoomTypeId, Long higherRoomTypeId) throws RoomTypeExistsException, UnknownPersistenceException, InputDataValidationException;
 
     public List<RoomType> retrieveAllRoomTypes();
+
+    public List<RoomType> retrieveAllRoomTypesOrderedByRank();
+
+    public void updateRoomType(RoomType roomType, Long lowerRoomTypeId, Long higherRoomTypeId) throws RoomTypeExistsException, UnknownPersistenceException, InputDataValidationException;
     
 }
