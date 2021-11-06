@@ -46,7 +46,7 @@ public class SystemAdministrationModule
             System.out.println("5: Logout\n");
             response = 0;
             
-            while(response < 1 || response > 4)
+            while(response < 1 || response > 5)
             {
                 System.out.print("> ");
 
@@ -95,7 +95,7 @@ public class SystemAdministrationModule
         String password;
         EmployeeAccessRight accessRight;
         
-        System.out.println("\n*** HoRs Management Client :: System Administration :: Employee Creation ***");
+        System.out.println("\n*** HoRS Management Client :: System Administration :: Employee Creation ***");
         System.out.print("Enter First Name> ");
         firstName = scanner.nextLine().trim();
         System.out.print("Enter Last Name> ");
@@ -171,7 +171,7 @@ public class SystemAdministrationModule
         String password;
         PartnerAccessRight accessRight;
         
-        System.out.println("\n*** HoRs Management Client :: System Administration :: Partner Creation ***");
+        System.out.println("\n*** HoRS Management Client :: System Administration :: Partner Creation ***");
         System.out.print("Enter Organisation> ");
         organisation = scanner.nextLine().trim();
         
