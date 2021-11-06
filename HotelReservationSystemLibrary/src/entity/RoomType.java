@@ -16,6 +16,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import util.enumeration.Bed;
 
 @Entity
@@ -40,8 +41,6 @@ public class RoomType implements Serializable {
     private List<String> amenities;
     @Column(nullable = false)
     private Boolean disabled;
-    @Column(nullable = false)
-    private Integer roomTypeRank; // Lowest rank = 1
     
     @OneToMany(mappedBy = "roomType")
     private List<Reservation> reservations;
@@ -52,6 +51,12 @@ public class RoomType implements Serializable {
     @OneToMany(mappedBy = "roomType")
     private List<RoomRate> roomRates;
     
+    @OneToOne(mappedBy = "lowerRoomType")
+    private RoomType higherRoomType;
+    
+    @OneToOne
+    private RoomType lowerRoomType;
+    
 
     public RoomType() {
         this.reservations = new ArrayList<>();
@@ -59,7 +64,7 @@ public class RoomType implements Serializable {
         this.roomRates = new ArrayList<>();
     }
 
-    public RoomType(String name, String description, Integer size, List<Bed> beds, Integer capacity, List<String> amenities, Boolean disabled, Integer roomTypeRank) {
+    public RoomType(String name, String description, Integer size, List<Bed> beds, Integer capacity, List<String> amenities, Boolean disabled) {
         this();
         this.name = name;
         this.description = description;
@@ -68,7 +73,6 @@ public class RoomType implements Serializable {
         this.capacity = capacity;
         this.amenities = amenities;
         this.disabled = disabled;
-        this.roomTypeRank = roomTypeRank;
     }
 
     
@@ -245,12 +249,19 @@ public class RoomType implements Serializable {
         this.roomRates = roomRates;
     }
 
-    public Integer getRoomTypeRank() {
-        return roomTypeRank;
+    public RoomType getHigherRoomType() {
+        return higherRoomType;
     }
 
-    public void setRoomTypeRank(Integer roomTypeRank) {
-        this.roomTypeRank = roomTypeRank;
+    public void setHigherRoomType(RoomType higherRoomType) {
+        this.higherRoomType = higherRoomType;
     }
 
+    public RoomType getLowerRoomType() {
+        return lowerRoomType;
+    }
+
+    public void setLowerRoomType(RoomType lowerRoomType) {
+        this.lowerRoomType = lowerRoomType;
+    }
 }

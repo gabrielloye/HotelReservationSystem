@@ -1,10 +1,12 @@
 package ejb.session.stateless;
 
 import entity.RoomType;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
@@ -33,7 +35,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     }
     
     @Override
-    public Long createNewRoomType(RoomType newRoomType) throws RoomTypeExistsException, UnknownPersistenceException, InputDataValidationException
+    public Long createNewRoomType(RoomType newRoomType, Long lowerRoomTypeId, Long higherRoomTypeId) throws RoomTypeExistsException, UnknownPersistenceException, InputDataValidationException
     {
         Set<ConstraintViolation<RoomType>>constraintViolations = validator.validate(newRoomType);
         
@@ -41,8 +43,8 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         {
             try
             {
-                updateRanks(newRoomType.getRoomTypeRank());
                 em.persist(newRoomType);
+                updateRanks(newRoomType, lowerRoomTypeId, higherRoomTypeId);
                 em.flush();
                 
                 return newRoomType.getRoomTypeId();
@@ -75,9 +77,32 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     @Override
     public List<RoomType> retrieveAllRoomTypes()
     {
-        Query query = em.createQuery("SELECT rt FROM RoomType rt ORDER BY rt.roomTypeRank");
+        Query query = em.createQuery("SELECT rt FROM RoomType rt");
         
         return query.getResultList();
+    }
+    
+    @Override
+    public List<RoomType> retrieveAllRoomTypesOrderedByRank()
+    {
+        Query query = em.createQuery("SELECT rt FROM RoomType rt WHERE rt.lowerRoomType IS NULL");
+        List<RoomType> roomTypes = new ArrayList<>();
+        
+        try
+        {
+            RoomType roomType = (RoomType)query.getSingleResult();
+            roomTypes.add(roomType);
+            while(roomType.getHigherRoomType() != null)
+            {
+                roomType = roomType.getHigherRoomType();
+                roomTypes.add(roomType);
+            }
+            return roomTypes;
+        }
+        catch(NoResultException ex)
+        {
+            return roomTypes;
+        }
     }
     
     public RoomType retrieveRoomTypeByRoomTypeId(Long roomTypeId)
@@ -87,7 +112,8 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         return roomType;
     }
     
-    public void updateRoomType(RoomType roomType)
+    @Override
+    public void updateRoomType(RoomType roomType, Long lowerRoomTypeId, Long higherRoomTypeId) throws RoomTypeExistsException, UnknownPersistenceException, InputDataValidationException
     {
         if(roomType != null && roomType.getRoomTypeId() != null)
         {
@@ -96,23 +122,58 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
             if(constraintViolations.isEmpty())
             {
                 RoomType roomTypeToUpdate = retrieveRoomTypeByRoomTypeId(roomType.getRoomTypeId());
+             
+                try
+                {
+                    roomTypeToUpdate.setName(roomType.getName());
+                    roomTypeToUpdate.setDescription(roomType.getDescription());
+                    roomTypeToUpdate.setSize(roomType.getSize());
+                    roomTypeToUpdate.setBeds(roomType.getBeds());
+                    roomTypeToUpdate.setCapacity(roomType.getCapacity());
+                    roomTypeToUpdate.setAmenities(roomType.getAmenities());
+                    roomTypeToUpdate.setDisabled(roomType.getDisabled());
+                    updateRanks(roomTypeToUpdate, lowerRoomTypeId, higherRoomTypeId);
+                }
+                catch(PersistenceException ex)
+                {
+                    if(ex.getCause() != null && ex.getCause().getClass().getName().equals("org.eclipse.persistence.exceptions.DatabaseException"))
+                {
+                    if(ex.getCause().getCause() != null && ex.getCause().getCause().getClass().getName().equals("java.sql.SQLIntegrityConstraintViolationException"))
+                    {
+                        throw new RoomTypeExistsException("Room type with the name: " + roomType.getName() + " already exists!");
+                    }
+                    else
+                    {
+                        throw new UnknownPersistenceException(ex.getMessage());
+                    }
+                    }
+                    else
+                    {
+                        throw new UnknownPersistenceException(ex.getMessage());
+                    }
+                }
                 
-                // Handle Exception here of persistence exception
-                
+            }
+            else
+            {
+                throw new InputDataValidationException(prepareInputDataValidationErrorsMessage(constraintViolations));
             }
         }
     }
     
-    private void updateRanks(int newRank)
+    private void updateRanks(RoomType newRoomType, Long lowerRoomTypeId, Long higherRoomTypeId)
     {
-        Query query = em.createQuery("SELECT rt FROM RoomType rt WHERE rt.roomTypeRank >= :newRank");
-        query.setParameter("newRank", newRank);
-        
-        List<RoomType> roomTypesToUpdate = query.getResultList();
-        for(RoomType roomType : roomTypesToUpdate)
+        if(lowerRoomTypeId != null)
         {
-            int updatedRank = roomType.getRoomTypeRank() + 1;
-            roomType.setRoomTypeRank(updatedRank);
+            RoomType lowerRoomType = retrieveRoomTypeByRoomTypeId(lowerRoomTypeId);
+            newRoomType.setLowerRoomType(lowerRoomType);
+            lowerRoomType.setHigherRoomType(newRoomType);
+        }
+        if(higherRoomTypeId != null)
+        {
+            RoomType higherRoomType = retrieveRoomTypeByRoomTypeId(higherRoomTypeId);
+            newRoomType.setHigherRoomType(higherRoomType);
+            higherRoomType.setLowerRoomType(newRoomType);
         }
     }
     

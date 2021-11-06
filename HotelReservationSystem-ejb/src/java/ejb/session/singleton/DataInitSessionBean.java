@@ -59,13 +59,13 @@ public class DataInitSessionBean {
             
             List<Bed> deluxeBeds = new ArrayList<>();
             deluxeBeds.add(Bed.QUEEN);
-            RoomType deluxeRoomType = new RoomType("Deluxe Room", "Deluxe Room Type", 450, deluxeBeds, 2, amenities, false, 1);
+            RoomType deluxeRoomType = new RoomType("Deluxe Room", "Deluxe Room Type", 450, deluxeBeds, 2, amenities, false);
             em.persist(deluxeRoomType);
             em.flush();
             
             List<Bed> premierBeds = new ArrayList<>();
             premierBeds.add(Bed.KING);
-            RoomType premierRoomType = new RoomType("Premier Room", "Premier Room Type", 500, premierBeds, 2, amenities, false, 2);
+            RoomType premierRoomType = new RoomType("Premier Room", "Premier Room Type", 500, premierBeds, 2, amenities, false);
             em.persist(premierRoomType);
             em.flush();
             
@@ -73,7 +73,7 @@ public class DataInitSessionBean {
             familyBeds.add(Bed.QUEEN);
             familyBeds.add(Bed.SINGLE);
             familyBeds.add(Bed.SINGLE);
-            RoomType familyRoomType = new RoomType("Family Room", "Family Room Type", 550, familyBeds, 4, amenities, false, 3);
+            RoomType familyRoomType = new RoomType("Family Room", "Family Room Type", 550, familyBeds, 4, amenities, false);
             em.persist(familyRoomType);
             em.flush();
             
@@ -81,7 +81,7 @@ public class DataInitSessionBean {
             juniorSuiteBeds.add(Bed.QUEEN);
             juniorSuiteBeds.add(Bed.QUEEN);
             juniorSuiteBeds.add(Bed.SINGLE);
-            RoomType juniorSuiteRoomType = new RoomType("Junior Suite", "Junior Suite Room Type", 600, juniorSuiteBeds, 5, amenities, false, 4);
+            RoomType juniorSuiteRoomType = new RoomType("Junior Suite", "Junior Suite Room Type", 600, juniorSuiteBeds, 5, amenities, false);
             em.persist(juniorSuiteRoomType);
             em.flush();
             
@@ -90,9 +90,18 @@ public class DataInitSessionBean {
             grandSuiteBeds.add(Bed.KING);
             grandSuiteBeds.add(Bed.SINGLE);
             grandSuiteBeds.add(Bed.SINGLE);
-            RoomType grandSuiteRoomType = new RoomType("Grand Suite", "Grand Suite Room Type", 650, grandSuiteBeds, 6, amenities, false, 5);
+            RoomType grandSuiteRoomType = new RoomType("Grand Suite", "Grand Suite Room Type", 650, grandSuiteBeds, 6, amenities, false);
             em.persist(grandSuiteRoomType);
             em.flush();
+            
+            deluxeRoomType.setHigherRoomType(premierRoomType);
+            premierRoomType.setLowerRoomType(deluxeRoomType);
+            premierRoomType.setHigherRoomType(familyRoomType);
+            familyRoomType.setLowerRoomType(premierRoomType);
+            familyRoomType.setHigherRoomType(juniorSuiteRoomType);
+            juniorSuiteRoomType.setLowerRoomType(familyRoomType);
+            juniorSuiteRoomType.setHigherRoomType(grandSuiteRoomType);
+            grandSuiteRoomType.setLowerRoomType(juniorSuiteRoomType);
             
             /**
             * RoomRate generation
