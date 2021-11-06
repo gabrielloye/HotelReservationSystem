@@ -35,26 +35,35 @@ public class Employee implements Serializable {
     @OneToMany(mappedBy = "employee")
     private List<Reservation> reservations;
 
-    public Employee() {
+    public Employee()
+    {
         this.reservations = new ArrayList<>();
     }
 
-    public Employee(Name name, EmployeeAccessRight accessRight, String username, String password) {
+    public Employee(Name name, EmployeeAccessRight accessRight, String username, String password)
+    {
         this();
+
         this.name = name;
         this.accessRight = accessRight;
         this.username = username;
         this.password = password;
     }
 
-    
-    
     public Long getEmployeeId() {
         return employeeId;
     }
 
     public void setEmployeeId(Long employeeId) {
         this.employeeId = employeeId;
+    }
+
+    public Name getName() {
+        return name;
+    }
+
+    public void setName(Name name) {
+        this.name = name;
     }
 
     public EmployeeAccessRight getAccessRight() {
@@ -104,20 +113,6 @@ public class Employee implements Serializable {
     @Override
     public String toString() {
         return "entity.Employee[ id=" + employeeId + " ]";
-    }
-
-    /**
-     * @return the name
-     */
-    public Name getName() {
-        return name;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public void setName(Name name) {
-        this.name = name;
     }
 
     /**

@@ -1,5 +1,7 @@
 package hotelreservationsystemmanagementclient;
 
+import ejb.session.stateless.EmployeeSessionBeanRemote;
+import ejb.session.stateless.PartnerSessionBeanRemote;
 import entity.Employee;
 import java.util.Scanner;
 import util.enumeration.EmployeeAccessRight;
@@ -11,7 +13,16 @@ public class MainApp
     private SystemAdministrationModule systemAdministrationModule;
     private HotelOperationModule hotelOperationModule;
     private FrontOfficeModule frontOfficeModule;
-            
+    
+    private EmployeeSessionBeanRemote employeeSessionBeanRemote;
+    private PartnerSessionBeanRemote partnerSessionBeanRemote;
+       
+    public MainApp(EmployeeSessionBeanRemote employeeSessionBeanRemote, PartnerSessionBeanRemote partnerSessionBeanRemote)
+    {
+        this.employeeSessionBeanRemote = employeeSessionBeanRemote;
+        this.partnerSessionBeanRemote = partnerSessionBeanRemote;
+    }
+    
     public MainApp()
     {
     }
@@ -39,7 +50,7 @@ public class MainApp
                     try
                     {
                         Employee currentEmployee = doLogin();
-                        System.out.println("Login Successful!\n");
+                        System.out.println("\nLogin Successful!");
 
                         mainMenu(currentEmployee);
                     }
@@ -71,7 +82,7 @@ public class MainApp
         String username;
         String password;
 
-        System.out.println("*** Employee Login ***\n");
+        System.out.println("\n*** Employee Login ***");
         System.out.print("Enter username> ");
         username = scanner.nextLine().trim();
         System.out.print("Enter password> ");
@@ -79,8 +90,7 @@ public class MainApp
 
         if(username.length() > 0 && password.length() > 0)
         {
-            // TODO: Call employee session bean .login() method and set to currentEmployee
-            return new Employee();
+            return employeeSessionBeanRemote.employeeLogin(username, password);
         }
         else
         {
@@ -92,8 +102,7 @@ public class MainApp
     {
         if(currentEmployee.getAccessRight() == EmployeeAccessRight.SYSTEMADMINISTRATOR)
         {
-            // TODO: Pass beans in Module
-            systemAdministrationModule = new SystemAdministrationModule();
+            systemAdministrationModule = new SystemAdministrationModule(employeeSessionBeanRemote, partnerSessionBeanRemote);
             systemAdministrationModule.SystemAdministrationMenu();
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.OPERATIONMANAGER)

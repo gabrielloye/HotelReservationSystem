@@ -9,14 +9,13 @@ import javax.ejb.LocalBean;
 import javax.ejb.Startup;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import util.embeddable.Name;
+import util.enumeration.EmployeeAccessRight;
 
 @Singleton
 @LocalBean
 @Startup
 public class DataInitSessionBean {
-
-    @EJB
-    private EmployeeSessionBeanLocal employeeSessionBeanLocal;
 
     @PersistenceContext(unitName = "HotelReservationSystem-ejbPU")
     private EntityManager em;
@@ -26,8 +25,8 @@ public class DataInitSessionBean {
     {
         if(em.find(Employee.class, 1l) == null)
         {
-            // TODO: Add Employee details
-            employeeSessionBeanLocal.createNewEmployee(new Employee());
+            Employee employee = new Employee(new Name("Hsien Jie", "Loke"), EmployeeAccessRight.SYSTEMADMINISTRATOR, "username", "password");
+            em.persist(employee);
         }
     }
     
