@@ -95,13 +95,13 @@ public class FrontOfficeModule
             }
         }
         
-//        List<RoomType> availableRoomTypes; 
-//        
-//        for(int i = 0; i < availableRoomTypes.size(); i++)
-//        {
-//            List<RoomRate> roomRates = availableRoomTypes.get(i).getRoomRates();
-//            System.out.println((i+1) + ". " + availableRoomTypes.get(i).getName() + );
-//        }
+        List<RoomType> availableRoomTypes; 
+        
+        for(int i = 0; i < availableRoomTypes.size(); i++)
+        {
+            List<RoomRate> roomRates = availableRoomTypes.get(i).getRoomRates();
+            System.out.println((i+1) + ". " + availableRoomTypes.get(i).getName() + "Amount : ");
+        }
     }
     
     private void checkInGuest()
