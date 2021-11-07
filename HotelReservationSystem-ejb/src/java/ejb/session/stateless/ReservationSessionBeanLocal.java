@@ -13,6 +13,6 @@ import javax.ejb.Local;
 @Local
 public interface ReservationSessionBeanLocal {
 
-    public List<Reservation> retrieveReservationWithStartDate(Date startDate);
+    public List<Reservation> retrieveReservationsWithStartDate(Date startDate);
     
 }

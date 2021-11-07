@@ -22,7 +22,7 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
 
     
     @Override
-    public List<Reservation> retrieveReservationWithStartDate(Date startDate)
+    public List<Reservation> retrieveReservationsWithStartDate(Date startDate)
     {
         Query query = em.createQuery("SELECT r FROM Reservation r WHERE r.startDate = :inStartDate ORDER BY r.reservationDate ASC");
         query.setParameter("inStartDate", startDate);

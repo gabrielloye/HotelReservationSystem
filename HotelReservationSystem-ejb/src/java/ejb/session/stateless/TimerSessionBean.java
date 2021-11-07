@@ -29,13 +29,10 @@ public class TimerSessionBean implements TimerSessionBeanRemote, TimerSessionBea
     private EntityManager em;
 
     @EJB
-    private ReservationSessionBeanLocal reservationSessionBeanRemote;
+    private ReservationSessionBeanLocal reservationSessionBeanLocal;
 
     @EJB
-    private RoomTypeSessionBeanLocal roomTypeSessionBeanRemote;
-    
-    @EJB
-    private RoomSessionBeanLocal roomSessionBeanRemote;
+    private RoomTypeSessionBeanLocal roomTypeSessionBeanLocal;
     
     @Schedule(dayOfWeek = "*", hour = "2", info = "currentDayRoomAllocationTimer")
     public void currentDayRoomAllocationTimer() 
@@ -49,15 +46,11 @@ public class TimerSessionBean implements TimerSessionBeanRemote, TimerSessionBea
         int date = now.getDate();
         Date today = new Date(year, month, date);
         
-        List<Reservation> todayReservations = reservationSessionBeanRemote.retrieveReservationWithStartDate(today);
+        List<Reservation> todayReservations = reservationSessionBeanLocal.retrieveReservationsWithStartDate(today);
         for(Reservation reservation : todayReservations)
         {
-            RoomType reservationRoomType = roomTypeSessionBeanRemote.retrieveRoomTypeByRoomTypeId(reservation.getRoomType().getRoomTypeId(), true, false, false);
-            List<Room> roomsWithRoomType = new ArrayList<>();
-            for (Room room : reservationRoomType.getRooms())
-            {
-                roomsWithRoomType.add(roomSessionBeanRemote.retrieveRoomByRoomId(room.getRoomId(), true));
-            }
+            RoomType reservationRoomType = roomTypeSessionBeanLocal.retrieveRoomTypeByRoomTypeId(reservation.getRoomType().getRoomTypeId(), true, false, false);
+            List<Room> roomsWithRoomType = reservationRoomType.getRooms();
             
             Integer numRooms = reservation.getNumRooms();
             int counter = 0;
@@ -68,12 +61,8 @@ public class TimerSessionBean implements TimerSessionBeanRemote, TimerSessionBea
             {
                 if (reservationRoomType.getHigherRoomType() != null) //if theres a higher roomType
                 {
-                    RoomType nextHigherRoomType = roomTypeSessionBeanRemote.retrieveRoomTypeByRoomTypeId(reservationRoomType.getHigherRoomType().getRoomTypeId(), true, false, false);
-                    List<Room> roomsWithHigherRoomType = new ArrayList<>();
-                        for (Room room : nextHigherRoomType.getRooms())
-                        {
-                            roomsWithHigherRoomType.add(roomSessionBeanRemote.retrieveRoomByRoomId(room.getRoomId(), true));
-                        }
+                    RoomType nextHigherRoomType = roomTypeSessionBeanLocal.retrieveRoomTypeByRoomTypeId(reservationRoomType.getHigherRoomType().getRoomTypeId(), true, false, false);
+                    List<Room> roomsWithHigherRoomType = nextHigherRoomType.getRooms();
                         
                     counter = allocateRoomsWithUpgradedException(reservation ,roomsWithHigherRoomType, counter, numRooms, today);
 

@@ -338,7 +338,7 @@ public class DataInitSessionBean {
             em.flush();
             
             //test upgraded and unavailable (expect 5x normal, 5x UPGRADED, 1x UNAVAILABLE)
-            Reservation reservationB = new Reservation(new Date(), new Date(121, 10, 7), new Date(121, 10, 9), 11, BigDecimal.valueOf(100), false, false);
+            Reservation reservationB = new Reservation(new Date(), new Date(121, 10, 8), new Date(121, 10, 9), 11, BigDecimal.valueOf(100), false, false);
             Customer customerB = new Customer(new Name("customer", "B"), "email2", Long.parseLong("8"));
             em.persist(reservationB);
             em.persist(customerB);
@@ -349,7 +349,7 @@ public class DataInitSessionBean {
             em.flush();
             
             //test no higher roomtype (expect 5x normal, 1x UNAVAILABLE)
-            Reservation reservationD = new Reservation(new Date(), new Date(121, 10, 7), new Date(121, 10, 9), 6, BigDecimal.valueOf(100), false, false);
+            Reservation reservationD = new Reservation(new Date(), new Date(121, 10, 8), new Date(121, 10, 9), 6, BigDecimal.valueOf(100), false, false);
             Customer customerD = new Customer(new Name("customer", "D"), "email4", Long.parseLong("6"));
             em.persist(reservationD);
             em.persist(customerD);
@@ -360,7 +360,7 @@ public class DataInitSessionBean {
             em.flush();
             
             //test overlapping (expect UPGRADED x3)
-            Reservation reservationE = new Reservation(new Date(), new Date(121, 10, 7), new Date(121, 10, 9), 3, BigDecimal.valueOf(100), false, false);
+            Reservation reservationE = new Reservation(new Date(), new Date(121, 10, 8), new Date(121, 10, 9), 3, BigDecimal.valueOf(100), false, false);
             Customer customerE = new Customer(new Name("customer", "E"), "email5", Long.parseLong("5"));
             em.persist(reservationE);
             em.persist(customerE);
@@ -371,7 +371,7 @@ public class DataInitSessionBean {
             em.flush();
             
             //test overlapping (expect normal x 2)
-            Reservation reservationF = new Reservation(new Date(), new Date(121, 10, 7), new Date(121, 10, 9), 2, BigDecimal.valueOf(100), false, false);
+            Reservation reservationF = new Reservation(new Date(), new Date(121, 10, 8), new Date(121, 10, 9), 2, BigDecimal.valueOf(100), false, false);
             Customer customerF = new Customer(new Name("customer", "F"), "email6", Long.parseLong("4"));
             em.persist(reservationF);
             em.persist(customerF);
@@ -382,7 +382,7 @@ public class DataInitSessionBean {
             em.flush();
             
             //test retrieve reservation by date
-            Reservation reservationC = new Reservation(new Date(), new Date(121, 10, 8), new Date(121, 10, 9), 3, BigDecimal.valueOf(100), false, false);
+            Reservation reservationC = new Reservation(new Date(), new Date(121, 10, 9), new Date(121, 10, 9), 3, BigDecimal.valueOf(100), false, false);
             Customer customerC = new Customer(new Name("customer", "C"), "email3", Long.parseLong("7"));
             em.persist(reservationC);
             em.persist(customerC);

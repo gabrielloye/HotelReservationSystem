@@ -13,6 +13,6 @@ import javax.ejb.Remote;
 @Remote
 public interface ReservationSessionBeanRemote {
     
-    public List<Reservation> retrieveReservationWithStartDate(Date startDate);
+    public List<Reservation> retrieveReservationsWithStartDate(Date startDate);
     
 }
