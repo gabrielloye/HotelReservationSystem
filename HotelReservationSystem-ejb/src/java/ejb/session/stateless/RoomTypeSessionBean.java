@@ -1,5 +1,6 @@
 package ejb.session.stateless;
 
+import entity.Room;
 import entity.RoomType;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import util.exception.DeleteRoomTypeException;
 import util.exception.InputDataValidationException;
 import util.exception.RoomTypeExistsException;
 import util.exception.UnknownPersistenceException;
@@ -175,6 +177,27 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
             newRoomType.setHigherRoomType(higherRoomType);
             higherRoomType.setLowerRoomType(newRoomType);
         }
+    }
+    
+    @Override
+    public void deleteRoomType(Long roomTypeId) throws DeleteRoomTypeException
+    {
+        RoomType roomTypeToDelete = retrieveRoomTypeByRoomTypeId(roomTypeId);
+        
+        if(roomTypeToDelete.getRooms().isEmpty())
+        {
+            em.remove(roomTypeToDelete);
+        }
+        else
+        {
+            throw new DeleteRoomTypeException("Room Type " + roomTypeToDelete.getName() + " is associated with existing room(s) and cannot be deleted!");
+        }
+    }
+    
+    public void disableRoomType(Long roomTypeId)
+    {
+        RoomType roomTypeToDisable = retrieveRoomTypeByRoomTypeId(roomTypeId);
+        roomTypeToDisable.setDisabled(true);
     }
     
     private String prepareInputDataValidationErrorsMessage(Set<ConstraintViolation<RoomType>>constraintViolations)

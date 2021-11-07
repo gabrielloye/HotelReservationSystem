@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import util.enumeration.Bed;
+import util.exception.DeleteRoomTypeException;
 import util.exception.InputDataValidationException;
 import util.exception.RoomTypeExistsException;
 import util.exception.UnknownPersistenceException;
@@ -111,7 +112,7 @@ public class HotelOperationModule
                 }
                 else if(response == 3)
                 {
-                    break;
+                    viewAllRoomTypes();
                 }
                 else if(response == 4)
                 {
@@ -338,7 +339,7 @@ public class HotelOperationModule
             }
             else if(response == 2)
             {
-                // DELETE ROOM TYPE
+                deleteRoomType(selectedRoomType);
             }
             else
             {
@@ -400,6 +401,8 @@ public class HotelOperationModule
         Integer response = 0;
         Long lowerRoomTypeId = null;
         Long higherRoomTypeId = null;
+        
+        System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: Update Room Type Details\n");
         
         System.out.print("Enter Room Type Name (blank if unchanged)> ");
         String newName = scanner.nextLine().trim();
@@ -581,6 +584,52 @@ public class HotelOperationModule
         {
             System.out.println(ex.getMessage() + "\n");
         }
+    }
+    
+    private void deleteRoomType(RoomType roomType)
+    {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: Delete Room Type\n");
+        System.out.printf("Confirm Deletion of Room Type %s (Room Type ID: %d) - Enter 'Y' to Delete> ", roomType.getName(), roomType.getRoomTypeId());
+        
+        String response = scanner.nextLine().trim();
+        if(response.equals("Y"))
+        {
+            try
+            {
+                roomTypeSessionBeanRemote.deleteRoomType(roomType.getRoomTypeId());
+                System.out.println("Room Type Deleted Successfully!\n");
+            }
+            catch(DeleteRoomTypeException ex)
+            {
+                System.out.println("\nAn error has occured while deleting room type: " + ex.getMessage() + "\n");
+                roomTypeSessionBeanRemote.disableRoomType(roomType.getRoomTypeId());
+                System.out.println("Room Type: " + roomType.getName() + " has been disabled and NOT deleted!\n");
+            }
+        }
+        else
+        {
+            System.out.println("\nRoom Type NOT Deleted!\n");
+        }
+    }
+    
+    private void viewAllRoomTypes()
+    {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: View All Room Types\n");
+        
+        List<RoomType> roomTypes = roomTypeSessionBeanRemote.retrieveAllRoomTypes();
+        System.out.printf("%-8s%-20s%-40s%-10s%-30s%-12s%-40s%-10s\n", "ID", "Name", "Description", "Size", "Beds", "Capacity", "Amenities", "Disabled");
+        
+        for(RoomType roomType : roomTypes)
+        {
+            System.out.printf("%-8s%-20s%-40s%-10s%-30s%-12s%-40s%-10s\n", roomType.getRoomTypeId(), roomType.getName(), roomType.getDescription(), roomType.getSize(), getBedListString(roomType.getBeds()), roomType.getCapacity(), String.join(", ", roomType.getAmenities()), roomType.getDisabled() ? "True" : "False");
+        }
+        
+        System.out.print("Press Enter to continue...> ");
+        scanner.nextLine();
     }
     
     private void roomOperationsMenu()
