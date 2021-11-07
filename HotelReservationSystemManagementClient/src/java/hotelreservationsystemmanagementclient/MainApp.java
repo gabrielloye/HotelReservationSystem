@@ -45,7 +45,6 @@ public class MainApp
             System.out.println("1. Login");
             System.out.println("2. Exit\n");
             response = 0;
-            timerSessionBeanRemote.useTimer();
             
             while(response < 1 || response > 2)
             {
