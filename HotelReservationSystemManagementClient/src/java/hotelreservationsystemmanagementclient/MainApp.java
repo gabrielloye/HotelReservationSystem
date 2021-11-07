@@ -2,6 +2,7 @@ package hotelreservationsystemmanagementclient;
 
 import ejb.session.stateless.EmployeeSessionBeanRemote;
 import ejb.session.stateless.PartnerSessionBeanRemote;
+import ejb.session.stateless.RoomRateSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
 import ejb.session.stateless.TimerSessionBeanRemote;
 import entity.Employee;
@@ -20,14 +21,16 @@ public class MainApp
     private PartnerSessionBeanRemote partnerSessionBeanRemote;
     private RoomTypeSessionBeanRemote roomTypeSessionBeanRemote;
     private TimerSessionBeanRemote timerSessionBeanRemote;
+    private RoomRateSessionBeanRemote roomRateSessionBeanRemote;
     
     
-    public MainApp(EmployeeSessionBeanRemote employeeSessionBeanRemote, PartnerSessionBeanRemote partnerSessionBeanRemote, RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, TimerSessionBeanRemote timerSessionBeanRemote)
+    public MainApp(EmployeeSessionBeanRemote employeeSessionBeanRemote, PartnerSessionBeanRemote partnerSessionBeanRemote, RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, TimerSessionBeanRemote timerSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote)
     {
         this.employeeSessionBeanRemote = employeeSessionBeanRemote;
         this.partnerSessionBeanRemote = partnerSessionBeanRemote;
         this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
         this.timerSessionBeanRemote = timerSessionBeanRemote;
+        this.roomRateSessionBeanRemote = roomRateSessionBeanRemote;
     }
     
     public MainApp()
@@ -124,7 +127,7 @@ public class MainApp
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.GUESTRELATIONOFFICER)
         {
-            frontOfficeModule = new FrontOfficeModule();
+            frontOfficeModule = new FrontOfficeModule(roomTypeSessionBeanRemote);
             frontOfficeModule.frontOfficeMenu();
         }
     }

@@ -1,8 +1,10 @@
 package ejb.session.stateless;
 
+import entity.Reservation;
 import entity.Room;
 import entity.RoomType;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import javax.ejb.Stateless;
@@ -173,6 +175,43 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
             }
         }
     }
+    
+    public List<RoomType> retrieveAvailableRoomTypes(Date startDate)
+    {
+        Query query = em.createQuery("SELECT DISTINCT rt FROM RoomType rt JOIN rt.roomRates rr WHERE rr.rateType = util.enumeration.RateType.PUBLISHED");
+        List<RoomType> roomTypes = query.getResultList();
+        
+        List<RoomType> availableRoomTypes = new ArrayList<>();
+        
+        for (RoomType rt : roomTypes)
+        {
+            List<Room> roomsWithRoomType = rt.getRooms();
+            for (Room room : roomsWithRoomType) 
+            {
+                List<Reservation> roomReservations = room.getReservations();
+                if (!roomReservations.isEmpty()) 
+                {
+                    Reservation latestReservation = roomReservations.get(roomReservations.size() - 1);
+                    
+                    if (room.getAvailable() && (latestReservation.getEndDate().before(startDate) || latestReservation.getEndDate().equals(startDate))) 
+                    {
+                        rt.getRoomRates().size();
+                        availableRoomTypes.add(rt);
+                        break;
+                    }
+                }
+                else
+                {
+                    rt.getRoomRates().size();
+                    availableRoomTypes.add(rt);
+                    break;
+                }
+            }
+        }
+        
+        return availableRoomTypes;
+    }
+    
     
     private void updateRanks(RoomType newRoomType, Long lowerRoomTypeId, Long higherRoomTypeId)
     {

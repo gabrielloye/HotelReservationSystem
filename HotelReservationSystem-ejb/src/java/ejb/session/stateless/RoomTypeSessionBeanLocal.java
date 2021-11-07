@@ -1,6 +1,7 @@
 package ejb.session.stateless;
 
 import entity.RoomType;
+import java.util.Date;
 import java.util.List;
 import javax.ejb.Local;
 import util.exception.InputDataValidationException;
@@ -19,5 +20,7 @@ public interface RoomTypeSessionBeanLocal {
     public void updateRoomType(RoomType roomType, Long lowerRoomTypeId, Long higherRoomTypeId) throws RoomTypeExistsException, UnknownPersistenceException, InputDataValidationException;
 
     public RoomType retrieveRoomTypeByRoomTypeId(Long roomTypeId, Boolean loadRooms, Boolean loadReservations, Boolean loadRoomRates);
+
+    public List<RoomType> retrieveAvailableRoomTypes(Date startDate);
     
 }
