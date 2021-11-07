@@ -22,5 +22,7 @@ public interface RoomTypeSessionBeanRemote {
     public void deleteRoomType(Long roomTypeId) throws DeleteRoomTypeException;
     
     public void disableRoomType(Long roomTypeId);
+
+    public RoomType retrieveRoomTypeByRoomTypeId(Long roomTypeId, Boolean loadRooms, Boolean loadReservations, Boolean loadRoomRates);
     
 }

@@ -3,6 +3,7 @@ package hotelreservationsystemmanagementclient;
 import ejb.session.stateless.EmployeeSessionBeanRemote;
 import ejb.session.stateless.PartnerSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
+import ejb.session.stateless.TimerSessionBeanRemote;
 import javax.ejb.EJB;
 
 public class Main {
@@ -11,11 +12,13 @@ public class Main {
     private static EmployeeSessionBeanRemote employeeSessionBeanRemote;
     @EJB
     private static PartnerSessionBeanRemote partnerSessionBeanRemote;
-     @EJB
+    @EJB
     private static RoomTypeSessionBeanRemote roomTypeSessionBeanRemote;
+    @EJB
+    private static TimerSessionBeanRemote timerSessionBeanRemote;
      
     public static void main(String[] args) {
-        MainApp mainApp = new MainApp(employeeSessionBeanRemote, partnerSessionBeanRemote, roomTypeSessionBeanRemote);
+        MainApp mainApp = new MainApp(employeeSessionBeanRemote, partnerSessionBeanRemote, roomTypeSessionBeanRemote, timerSessionBeanRemote);
         mainApp.runApp();
     }
     

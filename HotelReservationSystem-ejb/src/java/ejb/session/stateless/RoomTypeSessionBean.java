@@ -107,10 +107,22 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         }
     }
     
-    public RoomType retrieveRoomTypeByRoomTypeId(Long roomTypeId)
+    @Override
+    public RoomType retrieveRoomTypeByRoomTypeId(Long roomTypeId, Boolean loadRooms, Boolean loadReservations, Boolean loadRoomRates)
     {
         RoomType roomType = em.find(RoomType.class, roomTypeId);
-        
+        if (loadRooms)
+        {
+            roomType.getRooms().size();   
+        }
+        if (loadReservations)
+        {
+            roomType.getReservations().size();
+        }
+        if (loadRoomRates)
+        {
+            roomType.getRoomRates().size();
+        }
         return roomType;
     }
     
@@ -123,7 +135,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
             
             if(constraintViolations.isEmpty())
             {
-                RoomType roomTypeToUpdate = retrieveRoomTypeByRoomTypeId(roomType.getRoomTypeId());
+                RoomType roomTypeToUpdate = retrieveRoomTypeByRoomTypeId(roomType.getRoomTypeId(), false, false, false);
              
                 try
                 {
@@ -167,13 +179,13 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     {
         if(lowerRoomTypeId != null)
         {
-            RoomType lowerRoomType = retrieveRoomTypeByRoomTypeId(lowerRoomTypeId);
+            RoomType lowerRoomType = retrieveRoomTypeByRoomTypeId(lowerRoomTypeId, false, false, false);
             newRoomType.setLowerRoomType(lowerRoomType);
             lowerRoomType.setHigherRoomType(newRoomType);
         }
         if(higherRoomTypeId != null)
         {
-            RoomType higherRoomType = retrieveRoomTypeByRoomTypeId(higherRoomTypeId);
+            RoomType higherRoomType = retrieveRoomTypeByRoomTypeId(higherRoomTypeId, false, false, false);
             newRoomType.setHigherRoomType(higherRoomType);
             higherRoomType.setLowerRoomType(newRoomType);
         }
@@ -182,7 +194,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     @Override
     public void deleteRoomType(Long roomTypeId) throws DeleteRoomTypeException
     {
-        RoomType roomTypeToDelete = retrieveRoomTypeByRoomTypeId(roomTypeId);
+        RoomType roomTypeToDelete = retrieveRoomTypeByRoomTypeId(roomTypeId, false, false, false);
         
         if(roomTypeToDelete.getRooms().isEmpty())
         {
@@ -196,7 +208,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     
     public void disableRoomType(Long roomTypeId)
     {
-        RoomType roomTypeToDisable = retrieveRoomTypeByRoomTypeId(roomTypeId);
+        RoomType roomTypeToDisable = retrieveRoomTypeByRoomTypeId(roomTypeId, false, false, false);
         roomTypeToDisable.setDisabled(true);
     }
     
