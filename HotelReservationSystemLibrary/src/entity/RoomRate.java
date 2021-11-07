@@ -36,10 +36,10 @@ public class RoomRate implements Serializable {
     private RateType rateType;
     @Column(precision = 11, scale = 2, nullable = false)
     private BigDecimal ratePerNight;
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     @Column(nullable = true)
     private Date validityStartDate; 
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     @Column(nullable = true)
     private Date validityEndDate; 
     @Column(nullable = false)
