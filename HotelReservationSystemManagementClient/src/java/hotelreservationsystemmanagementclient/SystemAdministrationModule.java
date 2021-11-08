@@ -152,11 +152,11 @@ public class SystemAdministrationModule
         System.out.println("*** HoRS Management Client :: System Administration :: View All Employees ***\n");
         
         List<Employee> employees = employeeSessionBeanRemote.retrieveAllEmployees();
-        System.out.printf("%8s%20s%20s%20s%20s%20s\n", "Employee ID", "First Name", "Last Name", "Access Right", "Username", "Password");
+        System.out.printf("%-12s%-20s%-20s%-25s%-20s%-20s\n", "Employee ID", "First Name", "Last Name", "Access Right", "Username", "Password");
 
         for(Employee employee : employees)
         {
-            System.out.printf("%8s%20s%20s%20s%20s%20s\n", employee.getEmployeeId().toString(), employee.getName().getFirstName(), employee.getName().getLastName(), employee.getAccessRight().toString(), employee.getUsername(), employee.getPassword());
+            System.out.printf("%-12s%-20s%-20s%-25s%-20s%-20s\n", employee.getEmployeeId().toString(), employee.getName().getFirstName(), employee.getName().getLastName(), employee.getAccessRight().toString(), employee.getUsername(), employee.getPassword());
         }
         
         System.out.print("Press any key to continue...> ");
@@ -224,11 +224,11 @@ public class SystemAdministrationModule
         System.out.println("*** HoRS Management Client :: System Administration :: View All Partners ***\n");
         
         List<Partner> partners = partnerSessionBeanRemote.retrieveAllPartners();
-        System.out.printf("%8s%20s%20s%20s\n", "Partner ID", "Organisation", "Access Right", "Password");
+        System.out.printf("%-12s%-20s%-20s%-20s\n", "Partner ID", "Organisation", "Access Right", "Password");
 
         for(Partner partner : partners)
         {
-            System.out.printf("%8s%20s%20s%20s\n", partner.getPartnerId().toString(), partner.getOrganisation(), partner.getAccessRight(), partner.getPassword());
+            System.out.printf("%-12s%-20s%-20s%-20s\n", partner.getPartnerId().toString(), partner.getOrganisation(), partner.getAccessRight(), partner.getPassword());
         }
         
         System.out.print("Press any key to continue...> ");
