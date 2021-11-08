@@ -176,7 +176,7 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
         for(Reservation reservation : roomToDelete.getReservations())
         {
             // If reservation end date is equal or after current date, throw exception
-            if(reservation.getEndDate().compareTo(currentDate) = 0)
+            if(reservation.getEndDate().compareTo(currentDate) > 0)
             {
                 throw new DeleteRoomException("Room " + roomToDelete.getRoomNumber() + " is being used/has upcoming reservation(s), and cannot be deleted!");
             }
