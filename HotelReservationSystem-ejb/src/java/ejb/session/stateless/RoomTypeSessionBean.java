@@ -18,7 +18,9 @@ import javax.validation.ValidatorFactory;
 import util.exception.DeleteRoomTypeException;
 import util.exception.InputDataValidationException;
 import util.exception.RoomTypeExistsException;
+import util.exception.RoomTypeNotFoundException;
 import util.exception.UnknownPersistenceException;
+import util.exception.UpdateRoomTypeException;
 
 @Stateless
 public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeSessionBeanLocal
@@ -127,7 +129,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     }
     
     @Override
-    public void updateRoomType(RoomType roomType, Long lowerRoomTypeId, Long higherRoomTypeId) throws RoomTypeExistsException, UnknownPersistenceException, InputDataValidationException
+    public void updateRoomType(RoomType roomType, Long lowerRoomTypeId, Long higherRoomTypeId) throws RoomTypeNotFoundException, UpdateRoomTypeException, InputDataValidationException
     {
         if(roomType != null && roomType.getRoomTypeId() != null)
         {
@@ -137,9 +139,9 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
             {
                 RoomType roomTypeToUpdate = retrieveRoomTypeByRoomTypeId(roomType.getRoomTypeId(), false, false, false);
              
-                try
+                if(roomTypeToUpdate.getName().equals(roomType.getName()))
                 {
-                    roomTypeToUpdate.setName(roomType.getName());
+                    // Updates here, room type name cannot be updated through this method
                     roomTypeToUpdate.setDescription(roomType.getDescription());
                     roomTypeToUpdate.setSize(roomType.getSize());
                     roomTypeToUpdate.setBeds(roomType.getBeds());
@@ -148,30 +150,19 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
                     roomTypeToUpdate.setDisabled(roomType.getDisabled());
                     updateRanks(roomTypeToUpdate, lowerRoomTypeId, higherRoomTypeId);
                 }
-                catch(PersistenceException ex)
+                else
                 {
-                    if(ex.getCause() != null && ex.getCause().getClass().getName().equals("org.eclipse.persistence.exceptions.DatabaseException"))
-                {
-                    if(ex.getCause().getCause() != null && ex.getCause().getCause().getClass().getName().equals("java.sql.SQLIntegrityConstraintViolationException"))
-                    {
-                        throw new RoomTypeExistsException("Room type with the name: " + roomType.getName() + " already exists!");
-                    }
-                    else
-                    {
-                        throw new UnknownPersistenceException(ex.getMessage());
-                    }
-                    }
-                    else
-                    {
-                        throw new UnknownPersistenceException(ex.getMessage());
-                    }
+                    throw new UpdateRoomTypeException("Name of room type record to be updated does not match the existing record!");
                 }
-                
             }
             else
             {
                 throw new InputDataValidationException(prepareInputDataValidationErrorsMessage(constraintViolations));
             }
+        }
+        else
+        {
+            throw new RoomTypeNotFoundException("Room Type ID not provided for room type to be updated");
         }
     }
     

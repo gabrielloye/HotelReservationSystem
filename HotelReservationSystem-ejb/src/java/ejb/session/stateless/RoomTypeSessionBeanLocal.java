@@ -6,7 +6,9 @@ import javax.ejb.Local;
 import util.exception.DeleteRoomTypeException;
 import util.exception.InputDataValidationException;
 import util.exception.RoomTypeExistsException;
+import util.exception.RoomTypeNotFoundException;
 import util.exception.UnknownPersistenceException;
+import util.exception.UpdateRoomTypeException;
 
 @Local
 public interface RoomTypeSessionBeanLocal {
@@ -17,7 +19,7 @@ public interface RoomTypeSessionBeanLocal {
 
     public List<RoomType> retrieveAllRoomTypesOrderedByRank();
 
-    public void updateRoomType(RoomType roomType, Long lowerRoomTypeId, Long higherRoomTypeId) throws RoomTypeExistsException, UnknownPersistenceException, InputDataValidationException;
+    public void updateRoomType(RoomType roomType, Long lowerRoomTypeId, Long higherRoomTypeId) throws RoomTypeNotFoundException, UpdateRoomTypeException, InputDataValidationException;
 
     public void deleteRoomType(Long roomTypeId) throws DeleteRoomTypeException;
 
