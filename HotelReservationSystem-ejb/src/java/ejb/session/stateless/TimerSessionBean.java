@@ -33,6 +33,10 @@ public class TimerSessionBean implements TimerSessionBeanRemote, TimerSessionBea
 
     @EJB
     private RoomTypeSessionBeanLocal roomTypeSessionBeanLocal;
+
+    public TimerSessionBean()
+    {
+    }
     
     @Schedule(dayOfWeek = "*", hour = "2", info = "currentDayRoomAllocationTimer")
     public void currentDayRoomAllocationTimer() 

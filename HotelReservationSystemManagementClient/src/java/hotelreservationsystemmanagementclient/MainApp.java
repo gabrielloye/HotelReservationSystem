@@ -3,6 +3,7 @@ package hotelreservationsystemmanagementclient;
 import ejb.session.stateless.EmployeeSessionBeanRemote;
 import ejb.session.stateless.PartnerSessionBeanRemote;
 import ejb.session.stateless.RoomRateSessionBeanRemote;
+import ejb.session.stateless.RoomSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
 import ejb.session.stateless.TimerSessionBeanRemote;
 import entity.Employee;
@@ -20,16 +21,18 @@ public class MainApp
     private EmployeeSessionBeanRemote employeeSessionBeanRemote;
     private PartnerSessionBeanRemote partnerSessionBeanRemote;
     private RoomTypeSessionBeanRemote roomTypeSessionBeanRemote;
+    private RoomSessionBeanRemote roomSessionBeanRemote;
     private TimerSessionBeanRemote timerSessionBeanRemote;
     private RoomRateSessionBeanRemote roomRateSessionBeanRemote;
     
     
-    public MainApp(EmployeeSessionBeanRemote employeeSessionBeanRemote, PartnerSessionBeanRemote partnerSessionBeanRemote, RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, TimerSessionBeanRemote timerSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote)
+    public MainApp(EmployeeSessionBeanRemote employeeSessionBeanRemote, PartnerSessionBeanRemote partnerSessionBeanRemote, RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, TimerSessionBeanRemote timerSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote)
     {
         this.employeeSessionBeanRemote = employeeSessionBeanRemote;
         this.partnerSessionBeanRemote = partnerSessionBeanRemote;
         this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
         this.timerSessionBeanRemote = timerSessionBeanRemote;
+        this.roomSessionBeanRemote = roomSessionBeanRemote;
         this.roomRateSessionBeanRemote = roomRateSessionBeanRemote;
     }
     
@@ -41,6 +44,7 @@ public class MainApp
     {
         Scanner scanner = new Scanner(System.in);
         Integer response = 0;
+        timerSessionBeanRemote.currentDayRoomAllocationTimer();
         
         while(true)
         {
@@ -117,7 +121,7 @@ public class MainApp
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.OPERATIONMANAGER)
         {
-            hotelOperationModule = new HotelOperationModule(roomTypeSessionBeanRemote);
+            hotelOperationModule = new HotelOperationModule(roomTypeSessionBeanRemote, roomSessionBeanRemote);
             hotelOperationModule.operationManagerMenu();
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.SALESMANAGER)

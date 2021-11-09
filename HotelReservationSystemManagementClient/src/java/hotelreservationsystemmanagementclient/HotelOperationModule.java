@@ -1,6 +1,8 @@
 package hotelreservationsystemmanagementclient;
 
+import ejb.session.stateless.RoomSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
+import entity.Room;
 import entity.RoomType;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,23 +10,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import util.enumeration.Bed;
+import util.exception.DeleteRoomException;
+import util.exception.DeleteRoomTypeException;
 import util.exception.InputDataValidationException;
+import util.exception.RoomExistsException;
+import util.exception.RoomNotFoundException;
 import util.exception.RoomTypeExistsException;
+import util.exception.RoomTypeNotFoundException;
 import util.exception.UnknownPersistenceException;
+import util.exception.UpdateRoomException;
+import util.exception.UpdateRoomTypeException;
 
 
 public class HotelOperationModule
 {
     
     private RoomTypeSessionBeanRemote roomTypeSessionBeanRemote;
+    private RoomSessionBeanRemote roomSessionBeanRemote;
 
     public HotelOperationModule()
     {
     }
     
-    public HotelOperationModule(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote)
+    public HotelOperationModule(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote)
     {
         this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
+        this.roomSessionBeanRemote = roomSessionBeanRemote;
     }
     
     public void operationManagerMenu()
@@ -111,7 +122,7 @@ public class HotelOperationModule
                 }
                 else if(response == 3)
                 {
-                    break;
+                    viewAllRoomTypes();
                 }
                 else if(response == 4)
                 {
@@ -206,7 +217,7 @@ public class HotelOperationModule
         }
         catch(RoomTypeExistsException ex)
         {
-            System.out.println("An error has occurred while creating the new room type!: The room type with name: " + newRoomType.getName()  + " already exist\n");
+            System.out.println("An error has occurred while creating the new room type: The room type with name, " + newRoomType.getName()  + " already exists!\n");
         }
         catch(UnknownPersistenceException ex)
         {
@@ -338,7 +349,7 @@ public class HotelOperationModule
             }
             else if(response == 2)
             {
-                // DELETE ROOM TYPE
+                deleteRoomType(selectedRoomType);
             }
             else
             {
@@ -401,13 +412,8 @@ public class HotelOperationModule
         Long lowerRoomTypeId = null;
         Long higherRoomTypeId = null;
         
-        System.out.print("Enter Room Type Name (blank if unchanged)> ");
-        String newName = scanner.nextLine().trim();
-        if(newName.length() > 0)
-        {
-            roomType.setName(newName);
-        }
-        
+        System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: Update Room Type Details\n");
+
         System.out.print("Enter Description (blank if unchanged)> ");
         String newDescription = scanner.nextLine().trim();
         if(newDescription.length() > 0)
@@ -429,7 +435,8 @@ public class HotelOperationModule
             roomType.setCapacity(Integer.parseInt(newCapacity));
         }
         
-        while(true)
+        response = 0;
+        while(response < 1 || response > 2)
         {
             System.out.print("Enter whether Room Type is enabled - 1. Enabled, 2. Disabled (blank if unchanged)> ");
             String newDisabled = scanner.nextLine().trim();
@@ -571,16 +578,62 @@ public class HotelOperationModule
         try
         {
             roomTypeSessionBeanRemote.updateRoomType(roomType, lowerRoomTypeId, higherRoomTypeId);
-            System.out.println("Room Type updated successfully!\n");
+            System.out.println("\nRoom Type updated successfully!\n");
         }
-        catch (RoomTypeExistsException ex) 
+        catch(RoomTypeNotFoundException | UpdateRoomTypeException ex) 
         {
-            System.out.println("An error has occurred while updating Room Type: " + ex.getMessage() + "\n");
+            System.out.println("\nAn error has occurred while updating Room Type: " + ex.getMessage() + "\n");
         }
-        catch(UnknownPersistenceException | InputDataValidationException ex)
+        catch(InputDataValidationException ex)
         {
             System.out.println(ex.getMessage() + "\n");
         }
+    }
+    
+    private void deleteRoomType(RoomType roomType)
+    {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: Delete Room Type\n");
+        System.out.printf("Confirm Deletion of Room Type %s (Room Type ID: %d) - Enter 'Y' to Delete> ", roomType.getName(), roomType.getRoomTypeId());
+        
+        String response = scanner.nextLine().trim();
+        if(response.equals("Y"))
+        {
+            try
+            {
+                roomTypeSessionBeanRemote.deleteRoomType(roomType.getRoomTypeId());
+                System.out.println("Room Type Deleted Successfully!\n");
+            }
+            catch(DeleteRoomTypeException ex)
+            {
+                System.out.println("\nAn error has occured while deleting room type: " + ex.getMessage() + "\n");
+                roomTypeSessionBeanRemote.disableRoomType(roomType.getRoomTypeId());
+                System.out.println("Room Type: " + roomType.getName() + " has been disabled and NOT deleted!\n");
+            }
+        }
+        else
+        {
+            System.out.println("\nRoom Type NOT Deleted!\n");
+        }
+    }
+    
+    private void viewAllRoomTypes()
+    {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: View All Room Types\n");
+        
+        List<RoomType> roomTypes = roomTypeSessionBeanRemote.retrieveAllRoomTypes();
+        System.out.printf("%-8s%-20s%-40s%-10s%-30s%-12s%-40s%-10s\n", "ID", "Name", "Description", "Size", "Beds", "Capacity", "Amenities", "Disabled");
+        
+        for(RoomType roomType : roomTypes)
+        {
+            System.out.printf("%-8s%-20s%-40s%-10s%-30s%-12s%-40s%-10s\n", roomType.getRoomTypeId(), roomType.getName(), roomType.getDescription(), roomType.getSize(), getBedListString(roomType.getBeds()), roomType.getCapacity(), String.join(", ", roomType.getAmenities()), roomType.getDisabled() ? "True" : "False");
+        }
+        
+        System.out.print("Press Enter to continue...> ");
+        scanner.nextLine();
     }
     
     private void roomOperationsMenu()
@@ -606,19 +659,19 @@ public class HotelOperationModule
                 
                 if(response == 1)
                 {
-                    break;
+                    createRoom();
                 }
                 else if(response == 2)
                 {
-                    break;
+                    updateRoom();
                 }
                 else if(response == 3)
                 {
-                    break;
+                    deleteRoom();
                 }
                 else if(response == 4)
                 {
-                    break;
+                    viewAllRooms();
                 }
                 else if(response == 5)
                 {
@@ -633,6 +686,207 @@ public class HotelOperationModule
             if(response == 5)
             {
                 break;
+            }
+        }
+    }
+    
+    private void createRoom()
+    {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: Room Creation");
+        Room newRoom = new Room();
+        
+        System.out.print("Enter New Room Number> ");
+        String roomNumber = scanner.nextLine().trim();
+        newRoom.setRoomNumber(roomNumber);
+        
+        Integer response = 0;
+        while(response < 1 || response > 2)
+        {
+            System.out.println("\nSet Availability of New Room");
+            System.out.println("1. Available");
+            System.out.println("2. Unavailable");
+            System.out.print("> ");
+            response = scanner.nextInt();
+            scanner.nextLine();
+            if(response == 1)
+            {
+                newRoom.setAvailable(true);
+            }
+            else if(response == 2)
+            {
+                newRoom.setAvailable(false);
+            }
+            else
+            {
+                System.out.println("Invalid option, please try again!\n");
+            }
+        }
+        
+        System.out.println("Select Room Type of the new room being created");
+        RoomType roomType = selectRoomType();
+        
+        try
+        {
+            Long newRoomId = roomSessionBeanRemote.createNewRoom(newRoom, roomType.getRoomTypeId());
+            System.out.println("\nNew Room created with ID: " + newRoomId);
+        }
+        catch(RoomExistsException ex)
+        {
+            System.out.println("\nAn error has occurred while creating the new room: " + ex.getMessage() + "\n");
+        }
+        catch(UnknownPersistenceException ex)
+        {
+            System.out.println("\nAn unknown error has occurred while creating the new room!: " + ex.getMessage() + "\n");
+        }
+        catch(InputDataValidationException ex)
+        {
+            System.out.println("\n" + ex.getMessage() + "\n");
+        }
+    }
+    
+    private void updateRoom()
+    {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: Update Room\n");
+        
+        Room room = searchRoomNumber();
+        
+        Integer response = 0;
+        while(response < 1 || response > 2)
+        {
+            System.out.print("Enter whether Room is available - 1. Available, 2. Unavailable (blank if unchanged)> ");
+            String newAvailable = scanner.nextLine().trim();
+            if(newAvailable.length() > 0)
+            {
+                response = Integer.parseInt(newAvailable);
+                if(response == 1)
+                {
+                    room.setAvailable(true);
+                }
+                else if(response == 2)
+                {
+                    room.setAvailable(false);
+                }
+                else
+                {
+                    System.out.println("Invalid option! Please try again!\n");
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+        
+        response = 0;
+        while(response < 1 || response > 2)
+        {
+            System.out.println("Would you like to change the room type of this room?");
+            System.out.println("Current Room Type: " + room.getRoomType().getName());
+            System.out.println("1: Yes");
+            System.out.println("2: No");
+            System.out.print("> ");
+            
+            response = scanner.nextInt();
+            scanner.nextLine();
+            if(response == 1)
+            {
+                room.setRoomType(selectRoomType());
+            }
+            else if(response == 2)
+            {
+                break;
+            }
+            else
+            {
+                System.out.println("Invalid option, please try again!\n");
+            }
+        }
+        
+        try
+        {
+            roomSessionBeanRemote.updateRoom(room);
+            System.out.println("\nRoom updated successfully!\n");
+        }
+        catch (RoomNotFoundException | UpdateRoomException ex) 
+        {
+            System.out.println("\nAn error has occurred while updating the room: " + ex.getMessage() + "\n");
+        }
+        catch(InputDataValidationException ex)
+        {
+            System.out.println("\n" + ex.getMessage() + "\n");
+        }
+    }
+    
+    private void deleteRoom()
+    {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: Delete Room\n");
+        
+        Room room = searchRoomNumber();
+        
+        System.out.printf("\nConfirm Deletion of Room %s (Room ID: %d) - Enter 'Y' to Delete> ", room.getRoomNumber(), room.getRoomId());
+        
+        String response = scanner.nextLine().trim();
+        if(response.equals("Y"))
+        {
+            try
+            {
+                roomSessionBeanRemote.deleteRoom(room.getRoomId());
+                System.out.println("\nRoom Deleted Successfully!\n");
+            }
+            catch(DeleteRoomException ex)
+            {
+                System.out.println("\nAn error has occured while deleting room: " + ex.getMessage() + "\n");
+                roomSessionBeanRemote.unavailRoom(room.getRoomId());
+                System.out.println("Room: " + room.getRoomNumber() + " has been made unavailable and NOT deleted!\n");
+            }
+        }
+        else
+        {
+            System.out.println("\nRoom NOT Deleted!\n");
+        }
+    }
+    
+    private void viewAllRooms()
+    {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: View All Rooms\n");
+        
+        List<Room> rooms = roomSessionBeanRemote.retrieveAllRooms();
+        System.out.printf("%-8s%-15s%-20s%-10s\n", "ID", "Room Number", "Room Type", "Available");
+        
+        for(Room room : rooms)
+        {
+            System.out.printf("%-8s%-15s%-20s%-10s\n", room.getRoomId(), room.getRoomNumber(), room.getRoomType().getName(), room.getAvailable() ? "True" : "False");
+        }
+        
+        System.out.print("Press Enter to continue...> ");
+        scanner.nextLine();
+    }
+    
+    private Room searchRoomNumber()
+    {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.print("Enter Room Number> ");
+        String roomNumber = scanner.nextLine().trim();
+        
+        String response = "Y";
+        while(true)
+        {
+            try
+            {
+                return roomSessionBeanRemote.retrieveRoomByRoomNumber(roomNumber);
+            }
+            catch(RoomNotFoundException ex)
+            {
+                System.out.println(ex.getMessage());
             }
         }
     }

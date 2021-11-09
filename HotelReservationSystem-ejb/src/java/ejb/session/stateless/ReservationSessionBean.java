@@ -20,7 +20,10 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
     @PersistenceContext(unitName = "HotelReservationSystem-ejbPU")
     private EntityManager em;
 
-    
+    public ReservationSessionBean()
+    {
+    }
+
     @Override
     public List<Reservation> retrieveReservationsWithStartDate(Date startDate)
     {
