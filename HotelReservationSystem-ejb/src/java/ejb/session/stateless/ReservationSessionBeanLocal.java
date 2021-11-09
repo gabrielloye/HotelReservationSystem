@@ -9,10 +9,13 @@ import entity.Reservation;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.Local;
+import util.exception.CheckedOutException;
 
 @Local
 public interface ReservationSessionBeanLocal {
 
     public List<Reservation> retrieveReservationsWithStartDate(Date startDate);
+
+    public void checkOutReservation(Long reservationId) throws CheckedOutException;
     
 }

@@ -1,7 +1,9 @@
 package hotelreservationsystemmanagementclient;
 
+import ejb.session.stateless.CustomerSessionBeanRemote;
 import ejb.session.stateless.EmployeeSessionBeanRemote;
 import ejb.session.stateless.PartnerSessionBeanRemote;
+import ejb.session.stateless.ReservationSessionBeanRemote;
 import ejb.session.stateless.RoomRateSessionBeanRemote;
 import ejb.session.stateless.RoomSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
@@ -24,9 +26,11 @@ public class MainApp
     private RoomSessionBeanRemote roomSessionBeanRemote;
     private TimerSessionBeanRemote timerSessionBeanRemote;
     private RoomRateSessionBeanRemote roomRateSessionBeanRemote;
+    private CustomerSessionBeanRemote customerSessionBeanRemote;
+    private ReservationSessionBeanRemote reservationSessionBeanRemote;
     
     
-    public MainApp(EmployeeSessionBeanRemote employeeSessionBeanRemote, PartnerSessionBeanRemote partnerSessionBeanRemote, RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, TimerSessionBeanRemote timerSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote)
+    public MainApp(EmployeeSessionBeanRemote employeeSessionBeanRemote, PartnerSessionBeanRemote partnerSessionBeanRemote, RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, TimerSessionBeanRemote timerSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote, CustomerSessionBeanRemote customerSessionBeanRemote, ReservationSessionBeanRemote reservationSessionBeanRemote)
     {
         this.employeeSessionBeanRemote = employeeSessionBeanRemote;
         this.partnerSessionBeanRemote = partnerSessionBeanRemote;
@@ -34,6 +38,8 @@ public class MainApp
         this.timerSessionBeanRemote = timerSessionBeanRemote;
         this.roomSessionBeanRemote = roomSessionBeanRemote;
         this.roomRateSessionBeanRemote = roomRateSessionBeanRemote;
+        this.customerSessionBeanRemote = customerSessionBeanRemote;
+        this.reservationSessionBeanRemote = reservationSessionBeanRemote;
     }
     
     public MainApp()
@@ -131,7 +137,7 @@ public class MainApp
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.GUESTRELATIONOFFICER)
         {
-            frontOfficeModule = new FrontOfficeModule(roomTypeSessionBeanRemote);
+            frontOfficeModule = new FrontOfficeModule(roomTypeSessionBeanRemote, customerSessionBeanRemote, reservationSessionBeanRemote);
             frontOfficeModule.frontOfficeMenu();
         }
     }

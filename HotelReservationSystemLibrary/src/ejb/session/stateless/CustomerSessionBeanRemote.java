@@ -5,17 +5,14 @@
  */
 package ejb.session.stateless;
 
-import entity.Reservation;
-import java.util.Date;
-import java.util.List;
+import entity.Customer;
 import javax.ejb.Remote;
 import util.exception.CheckedOutException;
+import util.exception.CustomerNotFoundException;
 
 @Remote
-public interface ReservationSessionBeanRemote {
+public interface CustomerSessionBeanRemote {
     
-    public List<Reservation> retrieveReservationsWithStartDate(Date startDate);
-    
-    public void checkOutReservation(Long reservationId) throws CheckedOutException;
+    public Customer retrieveCustomerByEmail(String email) throws CustomerNotFoundException;
     
 }

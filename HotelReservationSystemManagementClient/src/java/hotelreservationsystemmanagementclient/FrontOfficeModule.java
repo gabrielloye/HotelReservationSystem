@@ -1,7 +1,11 @@
 package hotelreservationsystemmanagementclient;
 
+import ejb.session.stateless.CustomerSessionBeanRemote;
+import ejb.session.stateless.ReservationSessionBeanRemote;
 import ejb.session.stateless.RoomRateSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
+import entity.Customer;
+import entity.Reservation;
 import entity.RoomRate;
 import entity.RoomType;
 import java.math.BigDecimal;
@@ -11,6 +15,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 import util.enumeration.RateType;
+import util.exception.CheckedOutException;
+import util.exception.CustomerNotFoundException;
 import util.exception.RoomRateNotFoundException;
 
 
@@ -18,13 +24,17 @@ public class FrontOfficeModule
 {
 
     private RoomTypeSessionBeanRemote roomTypeSessionBeanRemote;
+    private CustomerSessionBeanRemote customerSessionBeanRemote;
+    private ReservationSessionBeanRemote reservationSessionBeanRemote;  
     
     public FrontOfficeModule()
     {
     }
 
-    public FrontOfficeModule(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote) {
+    public FrontOfficeModule(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, CustomerSessionBeanRemote customerSessionBeanRemote, ReservationSessionBeanRemote reservationSessionBeanRemote) {
         this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
+        this.customerSessionBeanRemote = customerSessionBeanRemote;
+        this.reservationSessionBeanRemote = reservationSessionBeanRemote;
     }
     
     public void frontOfficeMenu()
@@ -156,11 +166,62 @@ public class FrontOfficeModule
     
     private void checkInGuest()
     {
-
+        Scanner scanner = new Scanner(System.in);
+        
+        String email;        
+        System.out.println("\n*** HoRS Management Client :: Front Office Menu :: Check In Guest");
+        System.out.print("Enter Guest Email> ");
+        email = scanner.nextLine().trim();
+        
+        try
+        {
+            Customer customer = customerSessionBeanRemote.retrieveCustomerByEmail(email);
+           
+                
+        }
+        catch (CustomerNotFoundException ex)
+        {
+            System.out.println(ex.getMessage());
+        }
     }
+    
     
     private void checkOutGuest()
     {
-
+        Scanner scanner = new Scanner(System.in);
+        
+        String email;        
+        System.out.println("\n*** HoRS Management Client :: Front Office Menu :: Check Out Guest");
+        System.out.print("Enter Guest Email> ");
+        email = scanner.nextLine().trim();
+        
+        try
+        {
+            Customer customer = customerSessionBeanRemote.retrieveCustomerByEmail(email);
+            Reservation latestReservation = getCustomerLatestReservation(customer);
+            if(latestReservation != null)
+            {
+                reservationSessionBeanRemote.checkOutReservation(latestReservation.getReservationId());
+                System.out.println(String.format("Customer %s Successfully Checked Out for Reservation %s!", customer.getName().toString(), latestReservation.getReservationId()));
+            }
+        }
+        catch (CustomerNotFoundException | CheckedOutException ex)
+        {
+            System.out.println(ex.getMessage());
+        }
     }
+    
+    private Reservation getCustomerLatestReservation(Customer customer)
+    {        
+        List<Reservation> reservations = customer.getReservations();
+        if (reservations.isEmpty())
+        {
+            System.out.println("Customer does not have any reservations!");
+            return null;
+        }
+        else
+        {
+            return reservations.get(reservations.size() - 1);
+        }
+}
 }

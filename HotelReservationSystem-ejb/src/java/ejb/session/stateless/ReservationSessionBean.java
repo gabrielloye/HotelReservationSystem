@@ -13,6 +13,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import util.exception.CheckedOutException;
 
 @Stateless
 public class ReservationSessionBean implements ReservationSessionBeanRemote, ReservationSessionBeanLocal {
@@ -36,5 +37,19 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
             res.getAllocationExceptionReports().size();
         }
         return reservations;
+    }
+    
+    public void checkOutReservation(Long reservationId) throws CheckedOutException
+    {
+        Reservation reservation = em.find(Reservation.class, reservationId);
+        if (!reservation.getCheckOut())
+        {
+            reservation.setCheckOut(true);
+        }
+        else
+        {
+            throw new CheckedOutException("Customer has already checked out!");
+        }
+        
     }
 }
