@@ -7,11 +7,18 @@ package ejb.session.stateless;
 
 import entity.Customer;
 import javax.ejb.Local;
+import util.exception.CustomerExistsException;
 import util.exception.CustomerNotFoundException;
+import util.exception.InputDataValidationException;
+import util.exception.UnknownPersistenceException;
 
 @Local
 public interface CustomerSessionBeanLocal {
 
     public Customer retrieveCustomerByEmail(String email) throws CustomerNotFoundException;
+
+    public Customer retrieveCustomerByCustomerId(Long customerId, boolean loadReservations);
+
+    public Long createNewCustomer(Customer newCustomer) throws CustomerExistsException, UnknownPersistenceException, InputDataValidationException;
     
 }

@@ -242,6 +242,20 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         roomTypeToDisable.setDisabled(true);
     }
     
+    public int getMaxNumRoomsForRoomType(Long roomTypeId)
+    {
+        RoomType roomType = em.find(RoomType.class, roomTypeId);
+        int maxNumRooms = 0;
+        for (Room room : roomType.getRooms())
+        {
+            if(room.getAvailable())
+            {
+                maxNumRooms++;
+            }
+        }
+        return maxNumRooms;
+    }
+    
     private String prepareInputDataValidationErrorsMessage(Set<ConstraintViolation<RoomType>>constraintViolations)
     {
         String msg = "Input data validation error!:";

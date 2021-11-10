@@ -30,4 +30,6 @@ public interface RoomTypeSessionBeanRemote {
     
     public List<RoomType> retrieveAvailableRoomTypes(Date startDate);
     
+    public int getMaxNumRoomsForRoomType(Long roomTypeId);
+    
 }

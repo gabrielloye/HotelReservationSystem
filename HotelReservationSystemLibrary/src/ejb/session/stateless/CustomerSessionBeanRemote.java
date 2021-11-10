@@ -7,12 +7,18 @@ package ejb.session.stateless;
 
 import entity.Customer;
 import javax.ejb.Remote;
-import util.exception.CheckedOutException;
+import util.exception.CustomerExistsException;
 import util.exception.CustomerNotFoundException;
+import util.exception.InputDataValidationException;
+import util.exception.UnknownPersistenceException;
 
 @Remote
 public interface CustomerSessionBeanRemote {
     
     public Customer retrieveCustomerByEmail(String email) throws CustomerNotFoundException;
+    
+    public Customer retrieveCustomerByCustomerId(Long customerId, boolean loadReservations);
+    
+    public Long createNewCustomer(Customer newCustomer) throws CustomerExistsException, UnknownPersistenceException, InputDataValidationException;
     
 }
