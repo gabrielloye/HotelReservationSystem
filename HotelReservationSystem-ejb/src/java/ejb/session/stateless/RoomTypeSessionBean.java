@@ -1,6 +1,7 @@
 package ejb.session.stateless;
 
 import entity.Room;
+import entity.RoomRate;
 import entity.RoomType;
 import java.util.ArrayList;
 import java.util.List;
@@ -189,6 +190,12 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         
         if(roomTypeToDelete.getRooms().isEmpty())
         {
+            for(RoomRate roomRate : roomTypeToDelete.getRoomRates())
+            {
+                roomRate.setRoomType(null);
+                em.remove(roomRate);
+            }
+            roomTypeToDelete.getRoomRates().clear();
             em.remove(roomTypeToDelete);
         }
         else
