@@ -137,7 +137,7 @@ public class MainApp
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.GUESTRELATIONOFFICER)
         {
-            frontOfficeModule = new FrontOfficeModule(roomTypeSessionBeanRemote, customerSessionBeanRemote, reservationSessionBeanRemote);
+            frontOfficeModule = new FrontOfficeModule(currentEmployee, roomTypeSessionBeanRemote, customerSessionBeanRemote, reservationSessionBeanRemote);
             frontOfficeModule.frontOfficeMenu();
         }
     }

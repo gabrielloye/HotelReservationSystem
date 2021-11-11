@@ -31,5 +31,7 @@ public interface ReservationSessionBeanLocal {
     public List<AllocationExceptionReport> getAllocationReportForReservation(Long reservationId);
 
     public Long createNewReservation(Reservation newReservation, Long roomTypeId, Long customerId) throws ReservationExistsException, UnknownPersistenceException, InputDataValidationException;
+
+    public void associateEmployeeWithReservation(Long employeeId, Long reservationId);
     
 }

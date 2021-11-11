@@ -32,4 +32,6 @@ public interface ReservationSessionBeanRemote {
     
     public Long createNewReservation(Reservation newReservation, Long roomTypeId, Long customerId) throws ReservationExistsException, UnknownPersistenceException, InputDataValidationException;
     
+    public void associateEmployeeWithReservation(Long employeeId, Long reservationId);
+    
 }

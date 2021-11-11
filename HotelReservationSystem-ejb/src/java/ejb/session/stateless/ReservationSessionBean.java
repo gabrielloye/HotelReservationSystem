@@ -7,6 +7,7 @@ package ejb.session.stateless;
 
 import entity.AllocationExceptionReport;
 import entity.Customer;
+import entity.Employee;
 import entity.Partner;
 import entity.Reservation;
 import entity.Room;
@@ -90,6 +91,7 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
     public List<Room> getRoomsForReservation(Long reservationId)
     {
         Reservation reservation = em.find(Reservation.class, reservationId);
+        reservation.getRooms().size();
         return reservation.getRooms();
     }
     
@@ -97,6 +99,7 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
     public List<AllocationExceptionReport> getAllocationReportForReservation(Long reservationId)
     {
         Reservation reservation = em.find(Reservation.class, reservationId);
+        reservation.getAllocationExceptionReports().size();
         return reservation.getAllocationExceptionReports();
     }
     
@@ -143,6 +146,16 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
         {
             throw new InputDataValidationException(prepareInputDataValidationErrorsMessage(constraintViolations));
         }
+    }
+    
+    @Override
+    public void associateEmployeeWithReservation(Long employeeId, Long reservationId)
+    {
+        Reservation reservation = em.find(Reservation.class, reservationId);
+        Employee employee = em.find(Employee.class, employeeId);
+        
+        reservation.setEmployee(employee);
+        employee.getReservations().add(reservation);
     }
     
     private String prepareInputDataValidationErrorsMessage(Set<ConstraintViolation<Reservation>>constraintViolations)
