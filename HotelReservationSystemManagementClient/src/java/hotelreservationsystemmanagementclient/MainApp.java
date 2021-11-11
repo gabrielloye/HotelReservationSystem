@@ -50,16 +50,16 @@ public class MainApp
     {
         Scanner scanner = new Scanner(System.in);
         Integer response = 0;
-        timerSessionBeanRemote.currentDayRoomAllocationTimer();
         
         while(true)
         {
             System.out.println("*** Welcome to the HoRS Management Client ** \n");
             System.out.println("1. Login");
-            System.out.println("2. Exit\n");
+            System.out.println("2. Use Timer");
+            System.out.println("3. Exit\n");
             response = 0;
             
-            while(response < 1 || response > 2)
+            while(response < 1 || response > 3)
             {
                 System.out.print("> ");
                 
@@ -80,6 +80,10 @@ public class MainApp
                     }
                 }
                 else if(response == 2)
+                {
+                    timerSessionBeanRemote.useTimer();
+                }
+                else if(response == 3)
                 {
                     break;
                 }
@@ -137,7 +141,7 @@ public class MainApp
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.GUESTRELATIONOFFICER)
         {
-            frontOfficeModule = new FrontOfficeModule(currentEmployee, roomTypeSessionBeanRemote, customerSessionBeanRemote, reservationSessionBeanRemote);
+            frontOfficeModule = new FrontOfficeModule(currentEmployee, roomTypeSessionBeanRemote, customerSessionBeanRemote, reservationSessionBeanRemote, roomSessionBeanRemote);
             frontOfficeModule.frontOfficeMenu();
         }
     }

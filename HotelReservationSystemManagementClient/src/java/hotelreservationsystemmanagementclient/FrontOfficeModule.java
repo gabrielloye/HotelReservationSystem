@@ -3,6 +3,7 @@ package hotelreservationsystemmanagementclient;
 import ejb.session.stateless.CustomerSessionBeanRemote;
 import ejb.session.stateless.ReservationSessionBeanRemote;
 import ejb.session.stateless.RoomRateSessionBeanRemote;
+import ejb.session.stateless.RoomSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
 import entity.AllocationExceptionReport;
 import entity.Customer;
@@ -37,6 +38,7 @@ public class FrontOfficeModule
     private RoomTypeSessionBeanRemote roomTypeSessionBeanRemote;
     private CustomerSessionBeanRemote customerSessionBeanRemote;
     private ReservationSessionBeanRemote reservationSessionBeanRemote;  
+    private RoomSessionBeanRemote roomSessionBeanRemote;
     
     private Employee loggedInEmployee; 
     
@@ -44,11 +46,12 @@ public class FrontOfficeModule
     {
     }
 
-    public FrontOfficeModule(Employee currentEmployee, RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, CustomerSessionBeanRemote customerSessionBeanRemote, ReservationSessionBeanRemote reservationSessionBeanRemote) {
+    public FrontOfficeModule(Employee currentEmployee, RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, CustomerSessionBeanRemote customerSessionBeanRemote, ReservationSessionBeanRemote reservationSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote) {
         this.loggedInEmployee = currentEmployee;
         this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
         this.customerSessionBeanRemote = customerSessionBeanRemote;
         this.reservationSessionBeanRemote = reservationSessionBeanRemote;
+        this.roomSessionBeanRemote = roomSessionBeanRemote;
     }
     
     public void frontOfficeMenu()
@@ -108,60 +111,74 @@ public class FrontOfficeModule
         //arbituary dates initialised such that Start Date is after End Date
         Date startDate = new Date(121, 11, 10); 
         Date endDate = new Date(121, 11, 9);
-        while(startDate.after(endDate))
+        while(startDate.after(endDate) || startDate.equals(endDate))
         {
             startDate = enterDate("Enter Check-in Date (dd/MM/yyyy)> ");
             endDate = enterDate("Enter Check-out Date (dd/MM/yyyy)> ");
-            if (startDate.after(endDate))
+            if (startDate.after(endDate) || startDate.equals(endDate))
             {
                 System.out.println("End Date must be after Start Date! Try Again!");
             }
         }
         
         List<RoomType> availableRoomTypes = roomTypeSessionBeanRemote.retrieveAvailableRoomTypes(startDate);
-        List<BigDecimal> amountForRoomTypes = new ArrayList<>();
         
-        for(int i = 0; i < availableRoomTypes.size(); i++)
+        if (!availableRoomTypes.isEmpty())
         {
-            List<RoomRate> roomRates = availableRoomTypes.get(i).getRoomRates();
-            
-            RoomRate pubRoomRate = getPublishedRoomRateFromList(roomRates);
-            long timeDiff = endDate.getTime() - startDate.getTime();
-            BigDecimal numDays = new BigDecimal((timeDiff / (1000 * 60 * 60 * 24)));
-            amountForRoomTypes.add(pubRoomRate.getRatePerNight().multiply(numDays));
-            System.out.println((i+1) + ". " + availableRoomTypes.get(i).getName() + " - Amount : $" + amountForRoomTypes.get(i).toString());
-        }
-        
-        Integer response = 0;
-        String anotherReservation = "N";
-        while(response < 1 || response > 2 || anotherReservation.equals("Y")) 
-        {
-            System.out.println("Would you like to reserve a room from this list?");
-            System.out.println("1: Yes");
-            System.out.println("2: No");
-            System.out.print("> ");
+            List<BigDecimal> amountForRoomTypes = new ArrayList<>();
 
-            response = scanner.nextInt();
-            scanner.nextLine();
-            if(response == 1)
+            for(int i = 0; i < availableRoomTypes.size(); i++)
             {
-                Reservation newReservation = new Reservation(new Date(), startDate, endDate, 0, BigDecimal.valueOf(0.0), false, false);
-                walkInReserveRoom(availableRoomTypes, amountForRoomTypes, newReservation);
-                System.out.print("Would you like to reserve another room? Enter 'Y' if yes> ");
-                anotherReservation = scanner.nextLine().trim();
+                List<RoomRate> roomRates = availableRoomTypes.get(i).getRoomRates();
+
+                RoomRate pubRoomRate = getPublishedRoomRateFromList(roomRates);
+                long timeDiff = endDate.getTime() - startDate.getTime();
+                BigDecimal numDays = new BigDecimal((timeDiff / (1000 * 60 * 60 * 24)));
+                amountForRoomTypes.add(pubRoomRate.getRatePerNight().multiply(numDays));
+                System.out.println((i+1) + ". " + availableRoomTypes.get(i).getName() + " - Amount : $" + amountForRoomTypes.get(i).toString());
             }
-            else if(response == 2)
+
+            Integer response = 0;
+            String anotherReservation = "N";
+            Long customerId = new Long(0);
+            while(response < 1 || response > 2 || anotherReservation.equals("Y")) 
             {
-                break;
+                if (anotherReservation.equals("Y"))
+                {
+                    for(int i = 0; i < availableRoomTypes.size(); i++)
+                    {
+                        System.out.println((i+1) + ". " + availableRoomTypes.get(i).getName() + " - Amount : $" + amountForRoomTypes.get(i).toString());
+                    }
+                }
+                System.out.println("Would you like to reserve a room from this list?");
+                System.out.println("1: Yes");
+                System.out.println("2: No");
+                System.out.print("> ");
+
+                response = scanner.nextInt();
+                scanner.nextLine();
+                if(response == 1)
+                {
+                    Reservation newReservation = new Reservation(new Date(), startDate, endDate, 0, BigDecimal.valueOf(0.0), false, false);
+                    customerId = walkInReserveRoom(availableRoomTypes, amountForRoomTypes, newReservation, customerId);
+                    System.out.print("Would you like to reserve another room? Enter 'Y' if yes> ");
+                    anotherReservation = scanner.nextLine().trim();
+                }
+                else if(response == 2)
+                {
+                    break;
+                }
+                else
+                {
+                    System.out.println("Invalid option, please try again!\n");
+                }
             }
-            else
-            {
-                System.out.println("Invalid option, please try again!\n");
-            }
+        } else {
+            System.out.println("Sorry, no available rooms during the indicated period!");
         }
     }
     
-    private void walkInReserveRoom(List<RoomType> availableRoomTypes, List<BigDecimal> amountForRoomTypes, Reservation newReservation) {
+    private Long walkInReserveRoom(List<RoomType> availableRoomTypes, List<BigDecimal> amountForRoomTypes, Reservation newReservation, Long customerId) {
         Scanner scanner = new Scanner(System.in);
         
         Integer selectedRoomType = 0;
@@ -198,17 +215,26 @@ public class FrontOfficeModule
                 System.out.println("Do not have enough rooms! Please enter a number less than " + maxNumRooms + "!\n");
             }
         }
-
-        Long customerId = checkExistingCustomer();
+        
+        if(customerId.intValue() == 0) {
+            customerId = checkExistingCustomer();
+        }
 
         BigDecimal numRooms = new BigDecimal(response);
         newReservation.setNumRooms(response);
         newReservation.setPrice(amountForRoomTypes.get(selectedRoomType - 1).multiply(numRooms));
+        //add roomRate here!
 
         try {
             Long newReservationId = reservationSessionBeanRemote.createNewReservation(newReservation, availableRoomTypes.get(selectedRoomType - 1).getRoomTypeId(), customerId);
             reservationSessionBeanRemote.associateEmployeeWithReservation(loggedInEmployee.getEmployeeId(), newReservationId);
             System.out.println("New Reservation created with ID: " + newReservationId);
+            Date now = new Date();
+            Date today = new Date(now.getYear(), now.getMonth(), now.getDate());
+            if (newReservation.getStartDate().equals(today) && now.getHours() >= 2)
+            {
+                reservationSessionBeanRemote.allocateRoomsForReservationByReservationId(newReservationId);
+            }
         }
         catch(ReservationExistsException ex) //will this happen? no unique fields in reservation
         {
@@ -222,6 +248,7 @@ public class FrontOfficeModule
         {
             System.out.println(ex.getMessage() + "\n");
         }
+        return customerId;
     }
     
     private Long checkExistingCustomer()
@@ -342,43 +369,53 @@ public class FrontOfficeModule
         
         try
         {
-            Reservation latestReservation = reservationSessionBeanRemote.retrieveReservationByReservationId(reservationId, true, true);
-            if(latestReservation != null && latestReservation.getStartDate().before(new Date()))
+            Reservation reservation = reservationSessionBeanRemote.retrieveReservationByReservationId(reservationId, true, true);
+            if(reservation != null && reservation.getStartDate().before(new Date()))
             {
-                List<Room> reservationRooms = latestReservation.getRooms();
-                List<AllocationExceptionReport> reservationAllocationReports = latestReservation.getAllocationExceptionReports();
+                List<Room> reservationRooms = reservation.getRooms();
+                List<AllocationExceptionReport> reservationAllocationReports = reservation.getAllocationExceptionReports();
                 List<String> allocationReports = new ArrayList<>();
                 for (AllocationExceptionReport report : reservationAllocationReports)
                 {
                     allocationReports.add(report.getAllocationExceptionType().toString());
                 }
                     
-                if (!reservationRooms.isEmpty())
+                if (!reservationRooms.isEmpty() && roomSessionBeanRemote.earlyCheckIn(reservationRooms))
                 {
-                    reservationSessionBeanRemote.checkInReservation(latestReservation.getReservationId());
-
                     List<String> roomNumbers = new ArrayList<>();
                     for (Room room : reservationRooms)
                     {
                         roomNumbers.add(room.getRoomNumber());
                     }
+                    
+                    reservationSessionBeanRemote.checkInReservation(reservation.getReservationId());
                     System.out.println("Rooms allocated: " + String.join(", ", roomNumbers));
-                    System.out.println("Allocation Exceptions: " + String.join(", ", allocationReports));
-                    System.out.println(String.format("Customer successfully checked in for Reservation %s!", latestReservation.getReservationId()));
+                    if (!allocationReports.isEmpty())
+                    {
+                        System.out.println("Allocation Exceptions: " + String.join(", ", allocationReports));
+                    }
+                    System.out.println(String.format("Customer successfully checked in for Reservation %s!", reservation.getReservationId()));
                 }
                 else 
                 {
                     System.out.println("Sorry! No rooms were available to be allocated to this reservation!");
                     System.out.println("Allocation Exceptions: " + String.join(", ", allocationReports));
                 }
-            }                
+            } 
+            else if (reservation == null)
+            {
+                System.out.println("No such reservation found!");
+            } 
+            else if (!reservation.getStartDate().before(new Date()))
+            {
+                System.out.println("Reservation has not been allocated to rooms yet!");
+            }
         }
         catch (CheckedInException | ReservationNotFoundException ex)
         {
             System.out.println(ex.getMessage());
         }
     }
-    
     
     private void checkOutGuest()
     {

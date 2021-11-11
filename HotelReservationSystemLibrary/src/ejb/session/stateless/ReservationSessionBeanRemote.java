@@ -39,4 +39,6 @@ public interface ReservationSessionBeanRemote {
 
     public Reservation retrieveReservationByReservationId(Long reservationId, boolean loadRoom, boolean loadAllocationReports) throws ReservationNotFoundException;
     
+    public List<Room> allocateRoomsForReservationByReservationId(Long reservationId);
+    
 }

@@ -32,4 +32,6 @@ public interface RoomSessionBeanRemote {
 
     public void deleteRoom(Long roomId) throws DeleteRoomException;
     
+    public boolean earlyCheckIn(List<Room> rooms);
+    
 }

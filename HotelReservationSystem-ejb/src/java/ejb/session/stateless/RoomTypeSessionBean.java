@@ -177,15 +177,23 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         
         for (RoomType rt : roomTypes)
         {
-            List<Room> roomsWithRoomType = rt.getRooms();
-            for (Room room : roomsWithRoomType) 
+            for (Room room : rt.getRooms()) 
             {
                 List<Reservation> roomReservations = room.getReservations();
                 if (!roomReservations.isEmpty()) 
                 {
-                    Reservation latestReservation = roomReservations.get(roomReservations.size() - 1);
+                    boolean roomAllocated = false;
+                
+                    for (Reservation res : roomReservations)
+                    {
+                        if (res.getEndDate().after(startDate))
+                        {
+                            roomAllocated = true;
+                            break;
+                        }
+                    }
                     
-                    if (room.getAvailable() && (latestReservation.getEndDate().before(startDate) || latestReservation.getEndDate().equals(startDate))) 
+                    if (room.getAvailable() && !roomAllocated) 
                     {
                         rt.getRoomRates().size();
                         availableRoomTypes.add(rt);

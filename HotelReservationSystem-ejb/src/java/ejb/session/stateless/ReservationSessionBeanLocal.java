@@ -38,5 +38,7 @@ public interface ReservationSessionBeanLocal {
     public Reservation retrieveReservationByReservationId(Long reservationId) throws ReservationNotFoundException;
 
     public Reservation retrieveReservationByReservationId(Long reservationId, boolean loadRoom, boolean loadAllocationReports) throws ReservationNotFoundException;
+
+    public List<Room> allocateRoomsForReservationByReservationId(Long reservationId);
     
 }

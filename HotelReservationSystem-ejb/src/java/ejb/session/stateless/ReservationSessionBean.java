@@ -15,6 +15,7 @@ import entity.RoomType;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -24,6 +25,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import util.enumeration.AllocationExceptionType;
 import util.exception.CheckedInException;
 import util.exception.CheckedOutException;
 import util.exception.InputDataValidationException;
@@ -36,6 +38,9 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
 
     @PersistenceContext(unitName = "HotelReservationSystem-ejbPU")
     private EntityManager em;
+    
+    @EJB
+    private RoomTypeSessionBeanLocal roomTypeSessionBeanLocal;
     
     private final ValidatorFactory validatorFactory;
     private final Validator validator;
@@ -193,6 +198,118 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
         
         reservation.setEmployee(employee);
         employee.getReservations().add(reservation);
+    }
+    
+    @Override
+    public List<Room> allocateRoomsForReservationByReservationId(Long reservationId)
+    {
+        Date now = new Date();
+        Date today = new Date(now.getYear(), now.getMonth(), now.getDate());
+        
+        Reservation reservation = em.find(Reservation.class, reservationId);
+        RoomType reservationRoomType = reservation.getRoomType();
+        List<Room> roomsWithRoomType = reservationRoomType.getRooms();
+
+        Integer numRooms = reservation.getNumRooms();
+        int counter = 0;
+
+        counter = allocateRooms(reservation, roomsWithRoomType, counter, numRooms, today, false); //allocation with no exceptions
+
+        if (counter < numRooms) //not finished allocating yet, still need to upgrade/unavailable
+        {
+            if (reservationRoomType.getHigherRoomType() != null) //if theres a higher roomType
+            {
+                RoomType nextHigherRoomType = reservationRoomType.getHigherRoomType();
+                List<Room> roomsWithHigherRoomType = nextHigherRoomType.getRooms();
+
+                counter = allocateRooms(reservation, roomsWithHigherRoomType, counter, numRooms, today, true);
+
+                allocateRoomsWithUnavailableException(reservation, counter, numRooms); //allocate all remaining as unavailable
+            }  
+            else //if no higher roomType
+            {
+                allocateRoomsWithUnavailableException(reservation, counter, numRooms); //allocate all remaining as unavailable
+            }
+        }
+        return reservation.getRooms();
+    }
+    
+    private int allocateRooms(Reservation reservation, List<Room> roomsWithHigherRoomType, int counter, int numRooms, Date today, boolean upgrade)
+    {
+        for (Room room : roomsWithHigherRoomType) 
+        {
+            List<Reservation> roomReservations = room.getReservations();
+            if (!roomReservations.isEmpty())
+            {
+                boolean allocateRoom = true;
+                
+                for (Reservation res : roomReservations)
+                {
+                    if (res.getEndDate().after(today))
+                    {
+                        allocateRoom = false;
+                        break;
+                    }
+                }
+                
+                if (room.getAvailable() && allocateRoom) 
+                {
+                    reservation.getRooms().add(room);
+                    room.getReservations().add(reservation);
+                    System.out.println(String.format("Room %s allocated to Reservation %s", room.getRoomNumber(), reservation.getReservationId()));
+                    
+                    if (upgrade)
+                    {
+                        AllocationExceptionReport allocationExceptionReport = new AllocationExceptionReport(AllocationExceptionType.UPGRADED, new Date());
+                        em.persist(allocationExceptionReport);
+                        allocationExceptionReport.setReservation(reservation);
+                        reservation.getAllocationExceptionReports().add(allocationExceptionReport);
+                        em.flush();
+                        System.out.println("UPGRADED Allocation Exception Report Generated : " + allocationExceptionReport.getAllocationExceptionReportId());
+                    }
+                    counter++;
+                }
+            } 
+            else 
+            {
+                reservation.getRooms().add(room);
+                room.getReservations().add(reservation);
+                System.out.println(String.format("Room %s allocated to Reservation %s", room.getRoomNumber(), reservation.getReservationId()));
+                
+                if (upgrade)
+                {
+                    AllocationExceptionReport allocationExceptionReport = new AllocationExceptionReport(AllocationExceptionType.UPGRADED, new Date());
+                    em.persist(allocationExceptionReport);
+                    allocationExceptionReport.setReservation(reservation);
+                    reservation.getAllocationExceptionReports().add(allocationExceptionReport);
+                    em.flush();
+                    System.out.println("UPGRADED Allocation Exception Report Generated : " + allocationExceptionReport.getAllocationExceptionReportId());
+                }
+                counter++;
+            }
+
+            if (counter == numRooms)
+            {
+                break;
+            }
+        }
+        return counter;
+    }
+    
+    private void allocateRoomsWithUnavailableException(Reservation reservation, int counter, int numRooms)
+    {
+        while (counter < numRooms)
+        {
+            AllocationExceptionReport allocationExceptionReport = new AllocationExceptionReport(AllocationExceptionType.UNAVAILABLE, new Date());
+            em.persist(allocationExceptionReport);
+            allocationExceptionReport.setReservation(reservation);
+            reservation.getAllocationExceptionReports().add(allocationExceptionReport);
+            em.flush();
+
+            System.out.println("No room available for allocation for Reservation " + reservation.getReservationId());
+            System.out.println("UNAVAILABLE Allocation Exception Report Generated : " + allocationExceptionReport.getAllocationExceptionReportId());
+            counter++;
+        }
     }
     
     private String prepareInputDataValidationErrorsMessage(Set<ConstraintViolation<Reservation>>constraintViolations)
