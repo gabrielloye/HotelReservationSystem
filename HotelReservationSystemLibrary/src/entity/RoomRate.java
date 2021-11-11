@@ -71,6 +71,14 @@ public class RoomRate implements Serializable {
         this.disabled = disabled;
     }
     
+    public RoomRate(String name, RateType rateType, BigDecimal ratePerNight)
+    {
+        this();
+        this.name = name;
+        this.rateType = rateType;
+        this.ratePerNight = ratePerNight;
+        this.disabled = false;
+    }
     
     
     public Long getRoomRateId() {

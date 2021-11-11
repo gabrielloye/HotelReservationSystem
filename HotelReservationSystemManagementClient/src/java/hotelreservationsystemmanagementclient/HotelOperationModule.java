@@ -215,11 +215,18 @@ public class HotelOperationModule
                 }
             }
         }
-
+        
+        System.out.print("Enter Normal Room Rate> $");
+        BigDecimal normalRate = scanner.nextBigDecimal();
+        scanner.nextLine();
+        
+        System.out.print("Enter Published Room Rate> $");
+        BigDecimal publishedRate = scanner.nextBigDecimal();
+        scanner.nextLine();
         
         try
         {
-            Long newRoomTypeId = roomTypeSessionBeanRemote.createNewRoomType(newRoomType, lowerRoomTypeId, higherRoomTypeId);
+            Long newRoomTypeId = roomTypeSessionBeanRemote.createNewRoomType(newRoomType, lowerRoomTypeId, higherRoomTypeId, normalRate, publishedRate);
             System.out.println("New Room Type created with ID: " + newRoomTypeId);
         }
         catch(RoomTypeExistsException ex)
