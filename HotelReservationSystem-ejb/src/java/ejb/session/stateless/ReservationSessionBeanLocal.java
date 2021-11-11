@@ -14,5 +14,7 @@ import javax.ejb.Local;
 public interface ReservationSessionBeanLocal {
 
     public List<Reservation> retrieveReservationsWithStartDate(Date startDate);
+
+    public List<Reservation> retrieveReservationsForPartner(Long partnerId);
     
 }

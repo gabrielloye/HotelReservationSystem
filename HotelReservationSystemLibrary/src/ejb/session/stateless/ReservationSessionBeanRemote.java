@@ -15,4 +15,6 @@ public interface ReservationSessionBeanRemote {
     
     public List<Reservation> retrieveReservationsWithStartDate(Date startDate);
     
+    public List<Reservation> retrieveReservationsForPartner(Long partnerId);
+    
 }
