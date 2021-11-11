@@ -89,7 +89,7 @@ public class MainApp
                 }
                 else
                 {
-                    System.out.println("Invalid option, please choose one of the two options!\n");
+                    System.out.println("Invalid option, please choose one of the three options!\n");
                 }
             }
             
