@@ -15,6 +15,7 @@ import util.exception.CheckedInException;
 import util.exception.CheckedOutException;
 import util.exception.InputDataValidationException;
 import util.exception.ReservationExistsException;
+import util.exception.ReservationNotFoundException;
 import util.exception.UnknownPersistenceException;
 
 @Remote
@@ -33,5 +34,9 @@ public interface ReservationSessionBeanRemote {
     public Long createNewReservation(Reservation newReservation, Long roomTypeId, Long customerId) throws ReservationExistsException, UnknownPersistenceException, InputDataValidationException;
     
     public void associateEmployeeWithReservation(Long employeeId, Long reservationId);
+    
+    public Reservation retrieveReservationByReservationId(Long reservationId) throws ReservationNotFoundException;
+
+    public Reservation retrieveReservationByReservationId(Long reservationId, boolean loadRoom, boolean loadAllocationReports) throws ReservationNotFoundException;
     
 }

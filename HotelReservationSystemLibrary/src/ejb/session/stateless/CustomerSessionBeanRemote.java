@@ -15,10 +15,10 @@ import util.exception.UnknownPersistenceException;
 @Remote
 public interface CustomerSessionBeanRemote {
     
-    public Customer retrieveCustomerByEmail(String email) throws CustomerNotFoundException;
-    
     public Customer retrieveCustomerByCustomerId(Long customerId, boolean loadReservations);
     
     public Long createNewCustomer(Customer newCustomer) throws CustomerExistsException, UnknownPersistenceException, InputDataValidationException;
+    
+    public Customer retrieveCustomerByEmail(String email) throws CustomerNotFoundException;
     
 }

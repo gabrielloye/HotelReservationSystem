@@ -28,6 +28,7 @@ import util.exception.CheckedInException;
 import util.exception.CheckedOutException;
 import util.exception.InputDataValidationException;
 import util.exception.ReservationExistsException;
+import util.exception.ReservationNotFoundException;
 import util.exception.UnknownPersistenceException;
 
 @Stateless
@@ -45,6 +46,42 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
         validator = validatorFactory.getValidator();
     }
 
+    @Override
+    public Reservation retrieveReservationByReservationId(Long reservationId) throws ReservationNotFoundException
+    {
+        Reservation reservation = em.find(Reservation.class, reservationId);
+        if (reservation != null)
+        {
+            return reservation;
+        }
+        else
+        {
+            throw new ReservationNotFoundException("Rerservation ID " + reservationId + " does not exist!");
+        }
+    }
+    
+    @Override
+    public Reservation retrieveReservationByReservationId(Long reservationId, boolean loadRoom, boolean loadAllocationReports) throws ReservationNotFoundException
+    {
+        Reservation reservation = em.find(Reservation.class, reservationId);
+        if (reservation != null)
+        {
+            if (loadRoom)
+            {
+                reservation.getRooms().size();
+            }
+            if (loadAllocationReports)
+            {
+                reservation.getAllocationExceptionReports().size();
+            }
+            return reservation;
+        }
+        else
+        {
+            throw new ReservationNotFoundException("Rerservation ID " + reservationId + " does not exist!");
+        }
+    }
+    
     @Override
     public List<Reservation> retrieveReservationsWithStartDate(Date startDate)
     {

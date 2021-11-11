@@ -14,11 +14,11 @@ import util.exception.UnknownPersistenceException;
 
 @Local
 public interface CustomerSessionBeanLocal {
-
-    public Customer retrieveCustomerByEmail(String email) throws CustomerNotFoundException;
-
+    
     public Customer retrieveCustomerByCustomerId(Long customerId, boolean loadReservations);
 
     public Long createNewCustomer(Customer newCustomer) throws CustomerExistsException, UnknownPersistenceException, InputDataValidationException;
+
+    public Customer retrieveCustomerByEmail(String email) throws CustomerNotFoundException;
     
 }
