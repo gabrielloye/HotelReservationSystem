@@ -31,5 +31,7 @@ public interface RoomSessionBeanLocal {
     public void unavailRoom(Long roomId);
 
     public void deleteRoom(Long roomId) throws DeleteRoomException;
+
+    public boolean earlyCheckIn(List<Room> rooms);
     
 }

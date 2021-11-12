@@ -1,6 +1,8 @@
 package ejb.session.stateless;
 
 import entity.RoomType;
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import javax.ejb.Remote;
 import util.exception.DeleteRoomTypeException;
@@ -13,7 +15,7 @@ import util.exception.UpdateRoomTypeException;
 @Remote
 public interface RoomTypeSessionBeanRemote {
     
-    public Long createNewRoomType(RoomType newRoomType, Long lowerRoomTypeId, Long higherRoomTypeId) throws RoomTypeExistsException, UnknownPersistenceException, InputDataValidationException;
+    public Long createNewRoomType(RoomType newRoomType, Long lowerRoomTypeId, Long higherRoomTypeId, BigDecimal normalRate, BigDecimal publishedRate) throws RoomTypeExistsException, UnknownPersistenceException, InputDataValidationException;
 
     public List<RoomType> retrieveAllRoomTypes();
     
@@ -26,5 +28,9 @@ public interface RoomTypeSessionBeanRemote {
     public void disableRoomType(Long roomTypeId);
 
     public RoomType retrieveRoomTypeByRoomTypeId(Long roomTypeId, Boolean loadRooms, Boolean loadReservations, Boolean loadRoomRates);
+    
+    public List<RoomType> retrieveAvailableRoomTypes(Date startDate);
+    
+    public int getMaxNumRoomsForRoomType(Long roomTypeId);
     
 }

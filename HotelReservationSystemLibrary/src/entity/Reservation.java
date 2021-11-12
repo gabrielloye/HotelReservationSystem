@@ -68,13 +68,19 @@ public class Reservation implements Serializable {
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
     private RoomType roomType;
+    
+    @ManyToOne(optional = false)
+    @JoinColumn(nullable = false)
+    private RoomRate roomRate;
 
-    public Reservation() {
+    public Reservation()
+    {
         this.allocationExceptionReports = new ArrayList<>();
         this.rooms = new ArrayList<>();
     }
 
-    public Reservation(Date reservationDate, Date startDate, Date endDate, Integer numRooms, BigDecimal price, Boolean checkIn, Boolean checkOut) {
+    public Reservation(Date reservationDate, Date startDate, Date endDate, Integer numRooms, BigDecimal price, Boolean checkIn, Boolean checkOut)
+    {
         this();
         this.reservationDate = reservationDate;
         this.startDate = startDate;
@@ -298,6 +304,14 @@ public class Reservation implements Serializable {
      */
     public void setRoomType(RoomType roomType) {
         this.roomType = roomType;
+    }
+
+    public RoomRate getRoomRate() {
+        return roomRate;
+    }
+
+    public void setRoomRate(RoomRate roomRate) {
+        this.roomRate = roomRate;
     }
 
 }
