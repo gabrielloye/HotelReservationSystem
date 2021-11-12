@@ -318,7 +318,7 @@ public class FrontOfficeModule
             }
             catch(CustomerExistsException ex)
             {
-                System.out.println("An error has occurred while creating the new customer: Email or Mobile Number already exist!\n");
+                System.out.println("An error has occurred while creating the new customer: The email or mobile number already exist!\n");
             }
             catch(UnknownPersistenceException ex)
             {

@@ -5,10 +5,16 @@
  */
 package hotelreservationsystemreservationclient;
 
+import ejb.session.stateless.GuestSessionBeanRemote;
+import javax.ejb.EJB;
+
 public class Main {
 
+    @EJB
+    private static GuestSessionBeanRemote guestSessionBeanRemote;
+
     public static void main(String[] args) {
-        MainApp mainApp = new MainApp();
+        MainApp mainApp = new MainApp(guestSessionBeanRemote);
         mainApp.runApp();
     }
     
