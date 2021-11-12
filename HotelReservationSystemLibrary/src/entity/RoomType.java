@@ -17,6 +17,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import util.enumeration.Bed;
 
 @Entity
@@ -27,19 +29,28 @@ public class RoomType implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomTypeId;
     @Column(nullable = false, length = 64)
+    @NotNull
+    @Size(min = 1, max = 64)
     private String name;
     @Column(nullable = false, length = 128)
+    @NotNull
+    @Size(min = 0, max = 128)
     private String description;
     @Column(nullable = false, length = 4)
+    @NotNull
     private Integer size;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @NotNull
     private List<Bed> beds;
     @Column(nullable = false, length = 2)
+    @NotNull
     private Integer capacity;
     @Column(nullable = false)
+    @NotNull
     private List<String> amenities;
     @Column(nullable = false)
+    @NotNull
     private Boolean disabled;
     
     @OneToMany(mappedBy = "roomType")

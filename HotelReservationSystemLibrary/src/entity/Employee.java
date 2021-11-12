@@ -12,6 +12,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import util.embeddable.Name;
 import util.enumeration.EmployeeAccessRight;
 
@@ -23,13 +25,19 @@ public class Employee implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long employeeId;
     @Embedded
+    @NotNull
     private Name name;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @NotNull
     private EmployeeAccessRight accessRight;
     @Column(nullable = false, unique = true, length = 32)
+    @NotNull
+    @Size(min = 1, max = 32)
     private String username;
     @Column(nullable = false, length = 32)
+    @NotNull
+    @Size(min = 1, max = 32)
     private String password;
     
     @OneToMany(mappedBy = "employee")

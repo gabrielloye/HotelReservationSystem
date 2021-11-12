@@ -23,6 +23,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import util.enumeration.RateType;
 
 @Entity
@@ -33,19 +36,27 @@ public class RoomRate implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomRateId;
     @Column(nullable = false, length = 64)
+    @NotNull
+    @Size(min = 1, max = 64)
     private String name;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @NotNull
     private RateType rateType;
     @Column(precision = 11, scale = 2, nullable = false)
+    @NotNull
+    @DecimalMin(value="0.0", inclusive = true)
     private BigDecimal ratePerNight;
     @Temporal(TemporalType.DATE)
     @Column(nullable = true)
+    @NotNull
     private Date validityStartDate; 
     @Temporal(TemporalType.DATE)
     @Column(nullable = true)
+    @NotNull
     private Date validityEndDate; 
     @Column(nullable = false)
+    @NotNull
     private Boolean disabled;
     
     @ManyToOne(optional = false)

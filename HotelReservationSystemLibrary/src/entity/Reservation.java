@@ -21,6 +21,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 
 @Entity
 public class Reservation implements Serializable {
@@ -31,20 +33,28 @@ public class Reservation implements Serializable {
     private Long reservationId;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
+    @NotNull
     private Date reservationDate;
     @Temporal(TemporalType.DATE)
     @Column(nullable = false)
+    @NotNull
     private Date startDate;
     @Temporal(TemporalType.DATE)
     @Column(nullable = false)
+    @NotNull
     private Date endDate;
     @Column(nullable = false, length = 3)
+    @NotNull
     private Integer numRooms;
     @Column(precision = 11, scale = 2, nullable = false)
+    @NotNull
+    @DecimalMin(value="0.0", inclusive = true)
     private BigDecimal price;
     @Column(nullable = false)
+    @NotNull
     private Boolean checkIn;
     @Column(nullable = false)
+    @NotNull
     private Boolean checkOut;
     
     @ManyToOne(optional = true)

@@ -8,14 +8,20 @@ package entity;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import util.embeddable.Name;
 
 @Entity
 public class Guest extends Customer implements Serializable {
 
     @Column(nullable = false, length = 64, unique = true)
+    @NotNull
+    @Size(min = 1, max = 64)
     private String username;
     @Column(nullable = false, length = 64)
+    @NotNull
+    @Size(min = 1, max = 64)
     private String password;
 
     public Guest() {

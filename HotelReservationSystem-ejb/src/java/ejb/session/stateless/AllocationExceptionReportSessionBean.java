@@ -18,7 +18,8 @@ public class AllocationExceptionReportSessionBean implements AllocationException
     @PersistenceContext(unitName = "HotelReservationSystem-ejbPU")
     private EntityManager em;
 
-    public AllocationExceptionReportSessionBean() {
+    public AllocationExceptionReportSessionBean()
+    {
     }
     
     @Override

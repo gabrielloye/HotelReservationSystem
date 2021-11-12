@@ -5,21 +5,15 @@
  */
 package ejb.session.stateless;
 
-import entity.AllocationExceptionReport;
 import entity.Reservation;
-import entity.Room;
-import entity.RoomType;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import util.enumeration.AllocationExceptionType;
 
 
 @Stateless

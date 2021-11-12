@@ -2,16 +2,21 @@ package ejb.session.stateless;
 
 import entity.RoomRate;
 import entity.RoomType;
-import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import util.enumeration.RateType;
 import util.exception.DeleteRoomRateException;
+import util.exception.InputDataValidationException;
 import util.exception.RoomRateNotFoundException;
 import util.exception.UnknownPersistenceException;
 
@@ -23,27 +28,41 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
 
     @PersistenceContext(unitName = "HotelReservationSystem-ejbPU")
     private EntityManager em;
+    
+    private final ValidatorFactory validatorFactory;
+    private final Validator validator;
 
     public RoomRateSessionBean()
     {
+        validatorFactory = Validation.buildDefaultValidatorFactory();
+        validator = validatorFactory.getValidator();
     }
     
     @Override
-    public Long createNewRoomRate(RoomRate newRoomRate, Long roomTypeId) throws UnknownPersistenceException
+    public Long createNewRoomRate(RoomRate newRoomRate, Long roomTypeId) throws UnknownPersistenceException, InputDataValidationException
     {
-        try
+        Set<ConstraintViolation<RoomRate>>constraintViolations = validator.validate(newRoomRate);
+        
+        if(constraintViolations.isEmpty())
         {
-            RoomType roomType = roomTypeSessionBeanLocal.retrieveRoomTypeByRoomTypeId(roomTypeId, false, false, false);
-            em.persist(newRoomRate);
-            newRoomRate.setRoomType(roomType);
-            roomType.getRoomRates().add(newRoomRate);
-            em.flush();
-            
-            return newRoomRate.getRoomRateId();
+            try
+            {
+                RoomType roomType = roomTypeSessionBeanLocal.retrieveRoomTypeByRoomTypeId(roomTypeId, false, false, false);
+                em.persist(newRoomRate);
+                newRoomRate.setRoomType(roomType);
+                roomType.getRoomRates().add(newRoomRate);
+                em.flush();
+
+                return newRoomRate.getRoomRateId();
+            }
+            catch(PersistenceException ex)
+            {
+                throw new UnknownPersistenceException(ex.getMessage());
+            }
         }
-        catch(PersistenceException ex)
+        else
         {
-            throw new UnknownPersistenceException(ex.getMessage());
+            throw new InputDataValidationException(prepareInputDataValidationErrorsMessage(constraintViolations));
         }
     }
 
@@ -71,18 +90,27 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
     }
     
     @Override
-    public void updateRoomRate(RoomRate roomRate) throws RoomRateNotFoundException
+    public void updateRoomRate(RoomRate roomRate) throws RoomRateNotFoundException, InputDataValidationException
     {
         if(roomRate != null && roomRate.getRoomRateId() != null)
         {
-            RoomRate roomRateToUpdate = retrieveRoomRateByRoomRateId(roomRate.getRoomRateId());
+            Set<ConstraintViolation<RoomRate>>constraintViolations = validator.validate(roomRate);
             
-            roomRateToUpdate.setName(roomRate.getName());
-            roomRateToUpdate.setRateType(roomRate.getRateType());
-            roomRateToUpdate.setRatePerNight(roomRate.getRatePerNight());
-            roomRateToUpdate.setValidityStartDate(roomRate.getValidityStartDate());
-            roomRateToUpdate.setValidityEndDate(roomRate.getValidityEndDate());
-            roomRateToUpdate.setDisabled(roomRate.getDisabled());
+            if(constraintViolations.isEmpty())
+            {
+                RoomRate roomRateToUpdate = retrieveRoomRateByRoomRateId(roomRate.getRoomRateId());
+            
+                roomRateToUpdate.setName(roomRate.getName());
+                roomRateToUpdate.setRateType(roomRate.getRateType());
+                roomRateToUpdate.setRatePerNight(roomRate.getRatePerNight());
+                roomRateToUpdate.setValidityStartDate(roomRate.getValidityStartDate());
+                roomRateToUpdate.setValidityEndDate(roomRate.getValidityEndDate());
+                roomRateToUpdate.setDisabled(roomRate.getDisabled());
+            }
+            else
+            {
+                throw new InputDataValidationException(prepareInputDataValidationErrorsMessage(constraintViolations));
+            }
         }
     }
     
@@ -113,5 +141,17 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
     {
         RoomRate roomRateToDisable = retrieveRoomRateByRoomRateId(roomRateId);
         roomRateToDisable.setDisabled(true);
+    }
+    
+    private String prepareInputDataValidationErrorsMessage(Set<ConstraintViolation<RoomRate>>constraintViolations)
+    {
+        String msg = "Input data validation error!:";
+            
+        for(ConstraintViolation constraintViolation:constraintViolations)
+        {
+            msg += "\n\t" + constraintViolation.getPropertyPath() + " - " + constraintViolation.getInvalidValue() + "; " + constraintViolation.getMessage();
+        }
+        
+        return msg;
     }
 }

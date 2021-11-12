@@ -37,7 +37,8 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
     private final ValidatorFactory validatorFactory;
     private final Validator validator;
     
-    public GuestSessionBean() {
+    public GuestSessionBean()
+    {
         validatorFactory = Validation.buildDefaultValidatorFactory();
         validator = validatorFactory.getValidator();
     }

@@ -16,6 +16,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Entity
 public class Room implements Serializable {
@@ -25,8 +27,11 @@ public class Room implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
     @Column(nullable = false, unique = true, length = 4)
+    @NotNull
+    @Size(min = 4, max = 4)
     private String roomNumber;
     @Column(nullable = false)
+    @NotNull
     private Boolean available;
     
     @ManyToMany(mappedBy = "rooms")

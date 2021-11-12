@@ -1075,6 +1075,10 @@ public class HotelOperationModule
         {
             System.out.println("\nAn unknown error has occurred while creating the new room rate!: " + ex.getMessage() + "\n");
         }
+        catch(InputDataValidationException ex)
+        {
+            System.out.println(ex.getMessage() + "\n");
+        }
     }
     
     private void viewRoomRate() throws RoomRateNotFoundException
@@ -1244,6 +1248,10 @@ public class HotelOperationModule
         catch(RoomRateNotFoundException ex) 
         {
             System.out.println("\nAn error has occurred while updating Room Rate: " + ex.getMessage() + "\n");
+        }
+        catch(InputDataValidationException ex)
+        {
+            System.out.println(ex.getMessage() + "\n");
         }
     }
     

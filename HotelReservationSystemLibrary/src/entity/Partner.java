@@ -14,6 +14,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 
 @Entity
@@ -24,8 +26,12 @@ public class Partner implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long partnerId;
     @Column(nullable = false, length = 64, unique = true)
+    @NotNull
+    @Size(min = 1, max = 64)
     private String organisation;
     @Column(nullable = false, length = 64)
+    @NotNull
+    @Size(min = 1, max = 64)
     private String password;
 
     @OneToMany(mappedBy = "partner")

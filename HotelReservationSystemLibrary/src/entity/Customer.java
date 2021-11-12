@@ -17,6 +17,8 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import util.embeddable.Name;
 
 @Entity
@@ -29,20 +31,26 @@ public class Customer implements Serializable
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long customerId;
     @Embedded
+    @NotNull
     private Name name;
     @Column(nullable = false, length = 64, unique = true)
+    @NotNull
+    @Size(min=1)
     private String email;
     @Column(nullable = false, unique = true)
+    @NotNull
     private Long mobileNum;
     
     @OneToMany(mappedBy = "customer")
     private List<Reservation> reservations;
 
-    public Customer() {
+    public Customer()
+    {
         this.reservations = new ArrayList<>();
     }
 
-    public Customer(Name name, String email, Long mobileNum) {
+    public Customer(Name name, String email, Long mobileNum)
+    {
         this();
         this.name = name;
         this.email = email;

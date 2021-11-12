@@ -19,6 +19,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 import util.enumeration.AllocationExceptionType;
 
 @Entity
@@ -30,9 +31,11 @@ public class AllocationExceptionReport implements Serializable {
     private Long allocationExceptionReportId;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @NotNull
     private AllocationExceptionType allocationExceptionType;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
+    @NotNull
     private Date date;
     
     @ManyToOne(optional = false)
