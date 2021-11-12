@@ -208,6 +208,7 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
                 throw new DeleteRoomException("Room " + roomToDelete.getRoomNumber() + " is being used/has upcoming reservation(s), and cannot be deleted!");
             }
         }
+        roomToDelete.getRoomType().getRooms().remove(roomToDelete);
         em.remove(roomToDelete);
     }
     

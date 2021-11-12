@@ -52,6 +52,7 @@ public class TimerSessionBean implements TimerSessionBeanRemote, TimerSessionBea
         List<Reservation> todayReservations = reservationSessionBeanLocal.retrieveReservationsWithStartDate(date);
         for(Reservation reservation : todayReservations)
         {
+            System.out.println(reservation.getReservationId());
             reservationSessionBeanLocal.allocateRoomsForReservationByReservationId(reservation.getReservationId());
         }
     }

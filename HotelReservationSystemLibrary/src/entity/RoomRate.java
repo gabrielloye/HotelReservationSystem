@@ -49,11 +49,9 @@ public class RoomRate implements Serializable {
     private BigDecimal ratePerNight;
     @Temporal(TemporalType.DATE)
     @Column(nullable = true)
-    @NotNull
     private Date validityStartDate; 
     @Temporal(TemporalType.DATE)
     @Column(nullable = true)
-    @NotNull
     private Date validityEndDate; 
     @Column(nullable = false)
     @NotNull
@@ -63,7 +61,7 @@ public class RoomRate implements Serializable {
     @JoinColumn(nullable = false)
     private RoomType roomType;
     
-    @ManyToMany(mappedBy = "roomRates")
+    @ManyToMany
     private List<Reservation> reservations;
     
     public RoomRate()

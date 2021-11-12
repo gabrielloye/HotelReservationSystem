@@ -79,8 +79,6 @@ public class Reservation implements Serializable {
     @JoinColumn(nullable = false)
     private RoomType roomType;
     
-    @ManyToMany
-    private List<RoomRate> roomRates;
 
     public Reservation()
     {
@@ -88,7 +86,6 @@ public class Reservation implements Serializable {
         this.checkOut = false;
         this.allocationExceptionReports = new ArrayList<>();
         this.rooms = new ArrayList<>();
-        this.roomRates = new ArrayList<>();
     }
 
     public Reservation(Date reservationDate, Date startDate, Date endDate, Integer numRooms, BigDecimal price, Boolean checkIn, Boolean checkOut)
@@ -316,14 +313,6 @@ public class Reservation implements Serializable {
      */
     public void setRoomType(RoomType roomType) {
         this.roomType = roomType;
-    }
-
-    public List<RoomRate> getRoomRates() {
-        return roomRates;
-    }
-
-    public void setRoomRates(RoomRate roomRate) {
-        this.roomRates = roomRates;
     }
 
 }

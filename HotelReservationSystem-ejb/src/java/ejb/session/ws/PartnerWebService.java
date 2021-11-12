@@ -133,7 +133,6 @@ public class PartnerWebService {
 
         em.detach(reservation);
         reservation.getAllocationExceptionReports().clear();
-        reservation.getRoomRates().clear();
         reservation.getRooms().clear();
         reservation.setPartner(null);
         reservation.setEmployee(null);
@@ -164,7 +163,6 @@ public class PartnerWebService {
             
             em.detach(reservation);
             reservation.getAllocationExceptionReports().clear();
-            reservation.getRoomRates().clear();
             reservation.getRooms().clear();
             reservation.setPartner(null);
             reservation.setEmployee(null);

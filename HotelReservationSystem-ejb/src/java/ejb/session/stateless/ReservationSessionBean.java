@@ -175,7 +175,6 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
                 for(Long roomRateId : roomRateIds)
                 {
                     RoomRate rr = em.find(RoomRate.class, roomRateId);
-                    newReservation.getRoomRates().add(rr);
                     rr.getReservations().add(newReservation);
                 }
                 // Associate Customer if applicable
@@ -282,6 +281,7 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
             } 
             else if(room.getAvailable())
             {
+                System.out.println("DEBUG: " + room.getRoomId() + " " + reservation.getReservationId());
                 reservation.getRooms().add(room);
                 room.getReservations().add(reservation);
                 System.out.println(String.format("Room %s allocated to Reservation %s", room.getRoomNumber(), reservation.getReservationId()));
