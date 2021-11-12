@@ -1,5 +1,6 @@
 package hotelreservationsystemmanagementclient;
 
+import ejb.session.stateless.AllocationExceptionReportSessionBeanRemote;
 import ejb.session.stateless.CustomerSessionBeanRemote;
 import ejb.session.stateless.EmployeeSessionBeanRemote;
 import ejb.session.stateless.PartnerSessionBeanRemote;
@@ -28,9 +29,11 @@ public class Main {
     private static CustomerSessionBeanRemote customerSessionBeanRemote;
     @EJB
     private static ReservationSessionBeanRemote reservationSessionBeanRemote;
+    @EJB
+    private static AllocationExceptionReportSessionBeanRemote allocationExceptionReportSessionBeanRemote;
     
     public static void main(String[] args) {
-        MainApp mainApp = new MainApp(employeeSessionBeanRemote, partnerSessionBeanRemote, roomTypeSessionBeanRemote, timerSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote, customerSessionBeanRemote, reservationSessionBeanRemote);
+        MainApp mainApp = new MainApp(employeeSessionBeanRemote, partnerSessionBeanRemote, roomTypeSessionBeanRemote, timerSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote, customerSessionBeanRemote, reservationSessionBeanRemote, allocationExceptionReportSessionBeanRemote);
         mainApp.runApp();
     }
 }

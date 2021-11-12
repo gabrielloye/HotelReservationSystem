@@ -1,8 +1,10 @@
 package hotelreservationsystemmanagementclient;
 
+import ejb.session.stateless.AllocationExceptionReportSessionBeanRemote;
 import ejb.session.stateless.RoomRateSessionBeanRemote;
 import ejb.session.stateless.RoomSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
+import entity.AllocationExceptionReport;
 import entity.Room;
 import entity.RoomRate;
 import entity.RoomType;
@@ -37,16 +39,18 @@ public class HotelOperationModule
     private RoomTypeSessionBeanRemote roomTypeSessionBeanRemote;
     private RoomSessionBeanRemote roomSessionBeanRemote;
     private RoomRateSessionBeanRemote roomRateSessionBeanRemote;
+    private AllocationExceptionReportSessionBeanRemote allocationExceptionReportSessionBeanRemote;
 
     public HotelOperationModule()
     {
     }
     
-    public HotelOperationModule(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote)
+    public HotelOperationModule(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote, AllocationExceptionReportSessionBeanRemote allocationExceptionReportSessionBeanRemote)
     {
         this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
         this.roomSessionBeanRemote = roomSessionBeanRemote;
         this.roomRateSessionBeanRemote = roomRateSessionBeanRemote;
+        this.allocationExceptionReportSessionBeanRemote = allocationExceptionReportSessionBeanRemote;
     }
     
     public void operationManagerMenu()
@@ -79,8 +83,7 @@ public class HotelOperationModule
                 }
                 else if(response == 3)
                 {
-                    //TODO: Implement view room allocation exception report
-                    break;
+                    viewRoomAllocationExceptionReport();
                 }
                 else if(response == 4)
                 {
@@ -904,6 +907,30 @@ public class HotelOperationModule
         }
     }
     
+    private String formatDate(Date dateObj)
+    {
+        if(dateObj == null)
+        {
+            return "N/A";
+        }
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        return dateFormat.format(dateObj);
+    }
+    
+    private void viewRoomAllocationExceptionReport()
+    {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: View Room Allocation Exception Report");
+        
+        List<AllocationExceptionReport> allocationExceptionReports = allocationExceptionReportSessionBeanRemote.retrieveAllAllocationExceptionReports();
+        System.out.printf("%-8s%-30s%-10s\n", "ID", "Allocation Exception Type", "Date");
+        
+        for(AllocationExceptionReport aer : allocationExceptionReports)
+        {
+            System.out.printf("%-8s%-30s%-10s\n", aer.getAllocationExceptionReportId(), aer.getAllocationExceptionType().toString(), formatDate(aer.getDate()));
+        }
+    }
         
     public void salesManagerMenu()
     {
@@ -1281,16 +1308,6 @@ public class HotelOperationModule
         
         System.out.print("Press Enter to continue...> ");
         scanner.nextLine();
-    }
-    
-    private String formatDate(Date dateObj)
-    {
-        if(dateObj == null)
-        {
-            return "N/A";
-        }
-        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        return dateFormat.format(dateObj);
     }
     
     private Date enterDate(String dateMessage)
