@@ -80,6 +80,7 @@ public class HotelOperationModule
                 }
                 else if(response == 3)
                 {
+                    //TODO: Implement view room allocation exception report
                     break;
                 }
                 else if(response == 4)

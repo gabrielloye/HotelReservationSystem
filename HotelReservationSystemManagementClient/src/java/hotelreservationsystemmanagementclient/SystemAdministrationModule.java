@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Scanner;
 import util.embeddable.Name;
 import util.enumeration.EmployeeAccessRight;
-import util.enumeration.PartnerAccessRight;
 import util.exception.EmployeeUsernameExistsException;
 import util.exception.InputDataValidationException;
 import util.exception.PartnerExistsException;
@@ -169,34 +168,15 @@ public class SystemAdministrationModule
         
         String organisation;
         String password;
-        PartnerAccessRight accessRight;
         
         System.out.println("\n*** HoRS Management Client :: System Administration :: Partner Creation ***");
         System.out.print("Enter Organisation> ");
         organisation = scanner.nextLine().trim();
         
-        while(true)
-        {
-            System.out.println("Select Partner Access Right:");
-            System.out.print("(1: Employee, 2: Reservation Manager)> ");
-            Integer accessRightInt = scanner.nextInt();
-            
-            if(accessRightInt >= 1 && accessRightInt <= 2)
-            {
-                accessRight = PartnerAccessRight.values()[accessRightInt-1];
-                break;
-            }
-            else
-            {
-                System.out.println("Invalid option, please try again!\n");
-            }
-        }
-        
-        scanner.nextLine();
         System.out.print("Enter Password> ");
         password = scanner.nextLine().trim();
         
-        Partner newPartner = new Partner(organisation, accessRight, password);
+        Partner newPartner = new Partner(organisation, password);
         
         try
         {
@@ -224,11 +204,11 @@ public class SystemAdministrationModule
         System.out.println("*** HoRS Management Client :: System Administration :: View All Partners ***\n");
         
         List<Partner> partners = partnerSessionBeanRemote.retrieveAllPartners();
-        System.out.printf("%-12s%-20s%-20s%-20s\n", "Partner ID", "Organisation", "Access Right", "Password");
+        System.out.printf("%-12s%-20s%-20s\n", "Partner ID", "Organisation", "Password");
 
         for(Partner partner : partners)
         {
-            System.out.printf("%-12s%-20s%-20s%-20s\n", partner.getPartnerId().toString(), partner.getOrganisation(), partner.getAccessRight(), partner.getPassword());
+            System.out.printf("%-12s%-20s%-20s\n", partner.getPartnerId().toString(), partner.getOrganisation(), partner.getPassword());
         }
         
         System.out.print("Press any key to continue...> ");

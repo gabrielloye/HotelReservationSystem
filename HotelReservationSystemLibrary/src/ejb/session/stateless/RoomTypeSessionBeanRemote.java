@@ -2,6 +2,7 @@ package ejb.session.stateless;
 
 import entity.RoomType;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import javax.ejb.Remote;
 import util.exception.DeleteRoomTypeException;
