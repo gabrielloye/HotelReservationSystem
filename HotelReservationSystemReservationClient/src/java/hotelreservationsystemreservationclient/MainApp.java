@@ -2,24 +2,33 @@
 package hotelreservationsystemreservationclient;
 
 import ejb.session.stateless.GuestSessionBeanRemote;
+import ejb.session.stateless.ReservationSessionBeanRemote;
 import entity.Guest;
+import entity.Reservation;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 import util.embeddable.Name;
 import util.exception.GuestExistsException;
 import util.exception.InputDataValidationException;
 import util.exception.InvalidLoginCredentialException;
+import util.exception.ReservationNotFoundException;
 import util.exception.UnknownPersistenceException;
 
 public class MainApp {
     
     private Guest loggedInGuest;
     private GuestSessionBeanRemote guestSessionBeanRemote;
+    private ReservationSessionBeanRemote reservationSessionBeanRemote;
 
     public MainApp() {
     }
 
-    public MainApp(GuestSessionBeanRemote guestSessionBeanRemote) {
+    public MainApp(GuestSessionBeanRemote guestSessionBeanRemote, ReservationSessionBeanRemote reservationSessionBeanRemote) {
         this.guestSessionBeanRemote = guestSessionBeanRemote;
+        this.reservationSessionBeanRemote = reservationSessionBeanRemote;
     }
     
     public void runApp()
@@ -157,8 +166,9 @@ public class MainApp {
         {
             System.out.println("\n*** HoRS Reservation Client ***\n");
             System.out.println("1: Search Hotel Room");
-            System.out.println("2: View All My Reservations");
-            System.out.println("3: Logout\n");
+            System.out.println("2: View My Reservation Details");
+            System.out.println("3: View All My Reservations");
+            System.out.println("4: Logout\n");
             response = 0;
             
             while(response < 1 || response > 3)
@@ -173,10 +183,15 @@ public class MainApp {
                 }
                 else if(response == 2)
                 {
-                    viewAllMyReservations();
+                    viewMyReservationDetails();
                 }
                 else if(response == 3)
                 {
+                    viewAllMyReservations();
+                }
+                else if(response == 4)
+                {
+                    this.loggedInGuest = null;
                     break;
                 }
                 else
@@ -185,7 +200,7 @@ public class MainApp {
                 }
             }
             
-            if(response == 3)
+            if(response == 4)
             {
                 break;
             }
@@ -197,8 +212,81 @@ public class MainApp {
         
     }
     
+    private void viewMyReservationDetails()
+    {
+        Scanner scanner = new Scanner(System.in);
+        Long reservationId;
+
+        System.out.println("\n*** View My Reservation Details ***");
+        System.out.print("Enter reservation ID> ");
+        reservationId = scanner.nextLong();
+        scanner.nextLine();
+        
+        List<Reservation> reservations = guestSessionBeanRemote.retrieveAllGuestReservations(this.loggedInGuest.getCustomerId());
+        boolean myReservation = false;
+        for (Reservation res : reservations)
+        {
+            if (reservationId.equals(res.getReservationId()))
+            {
+                myReservation = true;
+                break;
+            }
+        }
+        
+        if (myReservation)
+        {
+            try {
+                Reservation reservation = reservationSessionBeanRemote.retrieveReservationByReservationId(reservationId);
+                System.out.println("ID: " + reservation.getReservationId());
+                System.out.println("Reservation Date: " + formatDate(reservation.getStartDate()));
+                System.out.println("Room Type: " + reservation.getRoomType().getName());
+                System.out.println("Start Date: " + formatDate(reservation.getStartDate()));
+                System.out.println("End Date: " + formatDate(reservation.getEndDate()));
+                System.out.println("No. of Rooms: " + reservation.getNumRooms());
+                System.out.println("Price: $" + reservation.getPrice());
+                System.out.println("Checked In: " + (reservation.getCheckIn() ? "True" : "False"));
+                System.out.println("Checked Out: " + (reservation.getCheckOut() ? "True" : "False"));
+
+                System.out.println("--------------------");
+                System.out.print("Press Enter to continue...> ");
+                scanner.nextLine();
+            }
+            catch (ReservationNotFoundException ex)
+            {
+                System.out.println(ex.getMessage());
+            }
+        }
+        else
+        {
+            System.out.println("You do not have a reservation with ID " + reservationId);
+        }
+    }
+    
     private void viewAllMyReservations()
     {
+        Scanner scanner = new Scanner(System.in);
+        List<Reservation> reservations = guestSessionBeanRemote.retrieveAllGuestReservations(this.loggedInGuest.getCustomerId());
+        System.out.printf("%-8s%-30s%-20s%-20s%-20s%-15s%-10s%-15s%-15s", "ID", "Reservation Date", "Room Type", "Start Date", "End Date", "No. of Rooms", "Price", "Checked-in", "Checked-out");
+        System.out.println();
         
+        for(Reservation reservation : reservations)
+        {
+            System.out.printf("%-8s%-30s%-20s%-20s%-20s%-15s%-10s%-15s%-15s", reservation.getReservationId(), reservation.getReservationDate(), reservation.getRoomType().getName(),
+                formatDate(reservation.getStartDate()), formatDate(reservation.getEndDate()), reservation.getNumRooms(), "$" + reservation.getPrice(),
+                reservation.getCheckIn() ? "True" : "False", reservation.getCheckOut() ? "True" : "False");
+            System.out.println();
+        }
+        System.out.print("Press Enter to continue...> ");
+        scanner.nextLine();
+    }
+    
+    private String formatDate(Date dateObj)
+    {
+        if(dateObj == null)
+        {
+            return "N/A";
+        }
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        return dateFormat.format(dateObj);
     }
 }

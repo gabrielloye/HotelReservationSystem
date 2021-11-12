@@ -7,6 +7,8 @@ package ejb.session.stateless;
 
 import entity.Employee;
 import entity.Guest;
+import entity.Reservation;
+import java.util.List;
 import java.util.Set;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -115,6 +117,14 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
         {
             throw new InputDataValidationException(prepareInputDataValidationErrorsMessage(constraintViolations));
         }
+    }
+    
+    @Override
+    public List<Reservation> retrieveAllGuestReservations(Long guestId)
+    {
+        Guest guest = em.find(Guest.class, guestId);
+        guest.getReservations().size();
+        return guest.getReservations();
     }
 
     private String prepareInputDataValidationErrorsMessage(Set<ConstraintViolation<Guest>>constraintViolations)

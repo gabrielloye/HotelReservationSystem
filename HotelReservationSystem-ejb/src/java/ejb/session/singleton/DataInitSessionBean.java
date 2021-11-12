@@ -2,6 +2,7 @@ package ejb.session.singleton;
 
 import entity.Customer;
 import entity.Employee;
+import entity.Guest;
 import entity.Reservation;
 import entity.Room;
 import entity.RoomRate;
@@ -361,7 +362,7 @@ public class DataInitSessionBean {
             
             //test overlapping (expect UPGRADED x3)
             Reservation reservationE = new Reservation(new Date(), new Date(121, 10, 12), new Date(121, 10, 14), 3, BigDecimal.valueOf(100), false, false);
-            Customer customerE = new Customer(new Name("customer", "E"), "email5", Long.parseLong("5"));
+            Guest customerE = new Guest("guestone", "password", new Name("customer", "E"), "email5", Long.parseLong("5"));
             em.persist(reservationE);
             em.persist(customerE);
             reservationE.setCustomer(customerE);
@@ -372,11 +373,10 @@ public class DataInitSessionBean {
             
             //test overlapping (expect normal x 2)
             Reservation reservationF = new Reservation(new Date(), new Date(121, 10, 12), new Date(121, 10, 14), 2, BigDecimal.valueOf(100), false, false);
-            Customer customerF = new Customer(new Name("customer", "F"), "email6", Long.parseLong("4"));
             em.persist(reservationF);
-            em.persist(customerF);
-            reservationF.setCustomer(customerF);
-            customerF.getReservations().add(reservationF);
+            em.persist(customerE);
+            reservationF.setCustomer(customerE);
+            customerE.getReservations().add(reservationF);
             reservationF.setRoomType(familyRoomType);
             familyRoomType.getReservations().add(reservationF);
             em.flush();
