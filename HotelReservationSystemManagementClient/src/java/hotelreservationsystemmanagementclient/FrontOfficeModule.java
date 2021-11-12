@@ -207,7 +207,7 @@ public class FrontOfficeModule
 
         try 
         {
-            Long newReservationId = reservationSessionBeanRemote.createNewReservation(newReservation, selectedRoomType.getRoomTypeId(), customerId, selectedRoomRate.getRoomRateId());
+            Long newReservationId = reservationSessionBeanRemote.createNewReservation(newReservation, selectedRoomType.getRoomTypeId(), customerId, new ArrayList<Long>());
             reservationSessionBeanRemote.associateEmployeeWithReservation(loggedInEmployee.getEmployeeId(), newReservationId);
             System.out.println("New Reservation created with ID: " + newReservationId + "\n");
             Date now = new Date();

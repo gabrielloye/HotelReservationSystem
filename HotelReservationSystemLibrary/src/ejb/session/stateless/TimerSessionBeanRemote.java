@@ -5,6 +5,7 @@
  */
 package ejb.session.stateless;
 
+import java.util.Date;
 import javax.ejb.Remote;
 
 @Remote
@@ -12,5 +13,5 @@ public interface TimerSessionBeanRemote {
     
     public void currentDayRoomAllocationTimer();
     
-    public void useTimer();
+    public void allocateRoomForDay(Date date);
 }

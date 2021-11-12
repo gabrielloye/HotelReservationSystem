@@ -1,6 +1,7 @@
 package holidayreservationsystemclient;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -64,7 +65,7 @@ public class MainApp
                     }
                     catch(InvalidLoginCredentialException_Exception ex)
                     {
-                        System.out.println("Invalid Login Credentials :" + ex.getMessage() +"\n");
+                        System.out.println("Invalid Login Credentials: " + ex.getMessage() +"\n");
                     }
                 }
                 else if(response == 2)
@@ -129,6 +130,10 @@ public class MainApp
             endDate = enterDate("Enter Check-out Date (dd/MM/yyyy)> ");
         }
         
+        System.out.print("Enter Number of Rooms Required> ");
+        Integer numRooms = scanner.nextInt();
+        scanner.nextLine();
+        
         long timeDiff = endDate.getTime() - startDate.getTime();
         BigDecimal numDays = new BigDecimal((timeDiff / (1000 * 60 * 60 * 24)));
         
@@ -140,18 +145,25 @@ public class MainApp
         GregorianCalendar endDateCalendar = new GregorianCalendar();
         endDateCalendar.setTime(endDate);
         
-        List<RoomType> availableRoomTypes = port.retrieveAvailableRoomTypes(factory.newXMLGregorianCalendar(startDateCalendar));
+        List<RoomType> availableRoomTypes = port.retrieveAvailableRoomTypes(factory.newXMLGregorianCalendar(startDateCalendar), numRooms);
         
         
         if(!availableRoomTypes.isEmpty())
         {
             Integer counter = 1;
-            List<RoomRate> allRoomRates = new ArrayList<>();
+            List<List<RoomRate>> allRoomRates = new ArrayList<>();
+            List<BigDecimal> allPrices = new ArrayList<>();
             for(RoomType roomType : availableRoomTypes)
             {
-                RoomRate chosenRoomRate = getPriorityRoomRate(roomType.getRoomRates());
-                allRoomRates.add(chosenRoomRate);
-                System.out.println(counter + ". " + roomType.getName() + " - Amount : $" + chosenRoomRate.getRatePerNight().multiply(numDays));
+                List<RoomRate> chosenRoomRates = getPriorityRoomRates(roomType.getRoomRates(), startDate, numDays.setScale(0, RoundingMode.HALF_UP).intValue());
+                allRoomRates.add(chosenRoomRates);
+                BigDecimal price = new BigDecimal(0);
+                for(RoomRate roomRate : chosenRoomRates)
+                {
+                    price = price.add(roomRate.getRatePerNight().multiply(new BigDecimal(numRooms)));
+                }
+                allPrices.add(price);
+                System.out.println(counter + ". " + roomType.getName() + " - Amount : $" + price);
                 counter++;
             }
             
@@ -197,8 +209,9 @@ public class MainApp
                             newReservation.setReservationDate(factory.newXMLGregorianCalendar(currentDateCalendar));
                             newReservation.setStartDate(factory.newXMLGregorianCalendar(startDateCalendar));
                             newReservation.setEndDate(factory.newXMLGregorianCalendar(endDateCalendar));
+                            newReservation.setNumRooms(numRooms);
                             
-                            reserveRoom(newReservation, availableRoomTypes.get(selectedRoomType - 1), allRoomRates.get(selectedRoomType - 1), numDays);
+                            reserveRoom(newReservation, availableRoomTypes.get(selectedRoomType - 1), allRoomRates.get(selectedRoomType - 1), allPrices.get(selectedRoomType - 1), numDays);
                         }
                         catch(InvalidLoginCredentialException_Exception ex)
                         {
@@ -222,76 +235,62 @@ public class MainApp
         }
     }
     
-    private RoomRate getPriorityRoomRate(List<RoomRate> roomRates)
+    private List<RoomRate> getPriorityRoomRates(List<RoomRate> roomRates, Date startDate, Integer numDays)
     {
-        List<RoomRate> validRoomRates = new ArrayList<>();
-        for(RoomRate roomRate : roomRates)
-        {
-            if(roomRate.getRateType().equals(RateType.NORMAL))
-            {
-                validRoomRates.add(roomRate);
-            }
-            // If validity end date is after current date and start date before current date
-            else if(!roomRate.getRateType().equals(RateType.PUBLISHED) && // Published only for walk-in
-                (roomRate.getValidityEndDate().toGregorianCalendar().getTime().compareTo(new Date()) > 0 ||
-                roomRate.getValidityStartDate().toGregorianCalendar().getTime().compareTo(new Date()) < 0))
-            {
-                validRoomRates.add(roomRate);
-            }
-        }
-        
         Map<RateType, Integer> ratePriorityMap = new HashMap<>();
         ratePriorityMap.put(RateType.PROMOTION, 1);
         ratePriorityMap.put(RateType.PEAK, 2);
         ratePriorityMap.put(RateType.NORMAL, 3);
         
-        Collections.sort(validRoomRates, (x, y) -> ratePriorityMap.get(x.getRateType()) - ratePriorityMap.get(y.getRateType()));
-        return validRoomRates.get(0); // Assume there is at least 1 valid room rate
+        List<RoomRate> finalRoomRates = new ArrayList<>();
+        for(int i = 0; i < numDays; i++)
+        {
+            Date rangeStart = new Date(startDate.getTime() + i * (1000 * 60 * 60 * 24));
+            Date rangeEnd = new Date(startDate.getTime() + (i + 1) * (1000 * 60 * 60 * 24));
+            List<RoomRate> validRoomRates = new ArrayList<>();
+            for(RoomRate roomRate : roomRates)
+            {
+                if(roomRate.getRateType().equals(RateType.NORMAL))
+                {
+                    validRoomRates.add(roomRate);
+                }
+                else if(!roomRate.getRateType().equals(RateType.PUBLISHED) &&
+                        roomRate.getValidityEndDate().toGregorianCalendar().getTime().compareTo(rangeStart) >= 0 && // Validity end date needs to be greater or equal to range start date
+                        roomRate.getValidityStartDate().toGregorianCalendar().getTime().compareTo(rangeEnd) < 0) // Validity start date needs to be before range end
+                {
+                    validRoomRates.add(roomRate);
+                }
+            }
+            Collections.sort(validRoomRates, (x, y) -> ratePriorityMap.get(x.getRateType()) - ratePriorityMap.get(y.getRateType()));
+            finalRoomRates.add(validRoomRates.get(0));// Assume there is at least 1 valid room rate
+        }
+        return finalRoomRates;
     }
     
-    private void reserveRoom(Reservation newReservation, RoomType selectedRoomType, RoomRate selectedRoomRate, BigDecimal numDays)
+    private void reserveRoom(Reservation newReservation, RoomType selectedRoomType, List<RoomRate> selectedRoomRates, BigDecimal price, BigDecimal numDays)
             throws InvalidLoginCredentialException_Exception
-    {
-        Scanner scanner = new Scanner(System.in);
-        
+    {   
         PartnerWebService_Service service = new PartnerWebService_Service();
         PartnerWebService port = service.getPartnerWebServicePort();
         
-        Integer maxNumRooms = port.getMaxNumRoomsForRoomType(currentOrganisation, currentPassword, selectedRoomType.getRoomTypeId());
-        
-        Integer response = 0;
-        while (response < 1 || response > maxNumRooms)
+        newReservation.setPrice(price);
+        List<Long> roomRateIds = new ArrayList<>();
+        for(RoomRate roomRate : selectedRoomRates)
         {
-            System.out.println("How many rooms would you like to reserve?");
-            System.out.print("> ");
-            response = scanner.nextInt();
-            scanner.nextLine();
-
-            if(response < 1)
-            {
-                System.out.println("Invalid option, please try again!\n");
-            }
-
-            if(response > maxNumRooms)
-            {
-                System.out.println("Do not have enough rooms! Please enter a number less than " + maxNumRooms + "!\n");
-            }
+            roomRateIds.add(roomRate.getRoomRateId());
         }
-        
-        BigDecimal numRooms = new BigDecimal(response);
-        newReservation.setNumRooms(response);
-        newReservation.setPrice(selectedRoomRate.getRatePerNight().multiply(numDays).multiply(numRooms));
+
         
         try
         {
-            Long newReservationId = port.createNewPartnerReservation(currentOrganisation, currentPassword, newReservation, selectedRoomType.getRoomTypeId(), selectedRoomRate.getRoomRateId());
-            System.out.println("New Reservation created with ID: " + newReservationId);
+            Long newReservationId = port.createNewPartnerReservation(currentOrganisation, currentPassword, newReservation, selectedRoomType.getRoomTypeId(), roomRateIds);
+            System.out.println("\nNew Reservation created with ID: " + newReservationId);
             Date now = new Date();
             Date today = new Date(now.getYear(), now.getMonth(), now.getDate());
             if (newReservation.getStartDate().equals(today) && now.getHours() >= 2)
             {
                 port.allocateRoomsForReservationByReservationId(currentOrganisation, currentPassword, newReservationId);
-                System.out.println("Room has been allocated");
+                System.out.println("\nRoom has been allocated");
             }
         }
         catch(UnknownPersistenceException_Exception ex)

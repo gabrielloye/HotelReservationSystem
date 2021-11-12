@@ -5,6 +5,7 @@
  */
 package ejb.session.stateless;
 
+import java.util.Date;
 import javax.ejb.Local;
 
 @Local
@@ -12,5 +13,5 @@ public interface TimerSessionBeanLocal {
 
     public void currentDayRoomAllocationTimer();
     
-    public void useTimer();
+    public void allocateRoomForDay(Date date);
 }

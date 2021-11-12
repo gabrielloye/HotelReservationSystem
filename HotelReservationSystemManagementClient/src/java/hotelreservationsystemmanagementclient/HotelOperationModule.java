@@ -640,12 +640,12 @@ public class HotelOperationModule
         
         System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: View All Room Types\n");
         
-        List<RoomType> roomTypes = roomTypeSessionBeanRemote.retrieveAllRoomTypes();
-        System.out.printf("%-8s%-20s%-40s%-10s%-30s%-12s%-40s%-10s\n", "ID", "Name", "Description", "Size", "Beds", "Capacity", "Amenities", "Disabled");
+        List<RoomType> roomTypes = roomTypeSessionBeanRemote.retrieveAllRoomTypesOrderedByRank();
+        System.out.printf("%-8s%-30s%-40s%-10s%-30s%-12s%-40s%-10s\n", "ID", "Name", "Description", "Size", "Beds", "Capacity", "Amenities", "Disabled");
         
         for(RoomType roomType : roomTypes)
         {
-            System.out.printf("%-8s%-20s%-40s%-10s%-30s%-12s%-40s%-10s\n", roomType.getRoomTypeId(), roomType.getName(), roomType.getDescription(), roomType.getSize(), getBedListString(roomType.getBeds()), roomType.getCapacity(), String.join(", ", roomType.getAmenities()), roomType.getDisabled() ? "True" : "False");
+            System.out.printf("%-8s%-30s%-40s%-10s%-30s%-12s%-40s%-10s\n", roomType.getRoomTypeId(), roomType.getName(), roomType.getDescription(), roomType.getSize(), getBedListString(roomType.getBeds()), roomType.getCapacity(), String.join(", ", roomType.getAmenities()), roomType.getDisabled() ? "True" : "False");
         }
         
         System.out.print("Press Enter to continue...> ");
@@ -875,11 +875,11 @@ public class HotelOperationModule
         System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: View All Rooms\n");
         
         List<Room> rooms = roomSessionBeanRemote.retrieveAllRooms();
-        System.out.printf("%-8s%-15s%-20s%-10s\n", "ID", "Room Number", "Room Type", "Available");
+        System.out.printf("%-8s%-15s%-30s%-10s\n", "ID", "Room Number", "Room Type", "Available");
         
         for(Room room : rooms)
         {
-            System.out.printf("%-8s%-15s%-20s%-10s\n", room.getRoomId(), room.getRoomNumber(), room.getRoomType().getName(), room.getAvailable() ? "True" : "False");
+            System.out.printf("%-8s%-15s%-30s%-10s\n", room.getRoomId(), room.getRoomNumber(), room.getRoomType().getName(), room.getAvailable() ? "True" : "False");
         }
         
         System.out.print("Press Enter to continue...> ");
@@ -924,11 +924,11 @@ public class HotelOperationModule
         System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: View Room Allocation Exception Report");
         
         List<AllocationExceptionReport> allocationExceptionReports = allocationExceptionReportSessionBeanRemote.retrieveAllAllocationExceptionReports();
-        System.out.printf("%-8s%-30s%-10s\n", "ID", "Allocation Exception Type", "Date");
+        System.out.printf("%-8s%-30s%-15s%-10s\n", "ID", "Allocation Exception Type", "Date", "Reservation ID");
         
         for(AllocationExceptionReport aer : allocationExceptionReports)
         {
-            System.out.printf("%-8s%-30s%-10s\n", aer.getAllocationExceptionReportId(), aer.getAllocationExceptionType().toString(), formatDate(aer.getDate()));
+            System.out.printf("%-8s%-30s%-15s%-10s\n", aer.getAllocationExceptionReportId(), aer.getAllocationExceptionType().toString(), formatDate(aer.getDate()), aer.getReservation().getReservationId());
         }
     }
         
@@ -1023,11 +1023,11 @@ public class HotelOperationModule
         {
             while(true)
             {
-                Date startDate = enterDate("Enter Validity Start Date> ");
-                Date endDate = enterDate("Enter Validity End Date> ");
-                if(startDate.compareTo(endDate) >= 0) // If start date is same as or after end date, show error message
+                Date startDate = enterDate("Enter Validity Start Date (dd/mm/yyyy)> ");
+                Date endDate = enterDate("Enter Validity End Date (dd/mm/yyyy)> ");
+                if(startDate.compareTo(endDate) > 0) // If start date is after end date, show error message
                 {
-                    System.out.println("Invalid Start/End Date Range: Start date must be before end date");
+                    System.out.println("Invalid Start/End Date Range: Start date must be before or equal to end date");
                 }
                 else
                 {
@@ -1182,9 +1182,9 @@ public class HotelOperationModule
                 {
                     while(true)
                     {
-                        Date startDate = enterDate("Enter Validity Start Date> ");
-                        Date endDate = enterDate("Enter Validity End Date> ");
-                        if(startDate.compareTo(endDate) >= 0) // If start date is same as or after end date, show error message
+                        Date startDate = enterDate("Enter Validity Start Date (dd/mm/yyyy)> ");
+                        Date endDate = enterDate("Enter Validity End Date (dd/mm/yyyy)> ");
+                        if(startDate.compareTo(endDate) > 0) // If start date is after end date, show error message
                         {
                             System.out.println("Invalid Start/End Date Range: Start date must be before end date");
                         }
@@ -1298,11 +1298,11 @@ public class HotelOperationModule
         
         List<RoomRate> roomRates = roomRateSessionBeanRemote.retrieveAllRoomRates();
         
-        System.out.printf("%-8s%-30s%-20s%-15s%-18s%-25s%-25s%-15s\n", "ID", "Name", "RoomType", "Rate Type", "Rate Per Night", "Validity Start Date", "Validity End Date", "Disabled");
+        System.out.printf("%-8s%-30s%-30s%-15s%-18s%-25s%-25s%-15s\n", "ID", "Name", "RoomType", "Rate Type", "Rate Per Night", "Validity Start Date", "Validity End Date", "Disabled");
         
         for(RoomRate roomRate : roomRates)
         {
-            System.out.printf("%-8s%-30s%-20s%-15s%-18s%-25s%-25s%-15s\n", roomRate.getRoomRateId(), roomRate.getName(), roomRate.getRoomType().getName(), roomRate.getRateType(),
+            System.out.printf("%-8s%-30s%-30s%-15s%-18s%-25s%-25s%-15s\n", roomRate.getRoomRateId(), roomRate.getName(), roomRate.getRoomType().getName(), roomRate.getRateType(),
                 roomRate.getRatePerNight(), formatDate(roomRate.getValidityStartDate()), formatDate(roomRate.getValidityEndDate()), roomRate.getDisabled() ? "True" : "False");
         }
         

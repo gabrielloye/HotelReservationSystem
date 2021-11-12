@@ -158,7 +158,7 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
     }
     
     @Override
-    public Long createNewReservation(Reservation newReservation, Long roomTypeId, Long customerId, Long roomRateId) throws UnknownPersistenceException, InputDataValidationException
+    public Long createNewReservation(Reservation newReservation, Long roomTypeId, Long customerId, List<Long> roomRateIds) throws UnknownPersistenceException, InputDataValidationException
     {
         Set<ConstraintViolation<Reservation>>constraintViolations = validator.validate(newReservation);
         
@@ -172,9 +172,12 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
                 newReservation.setRoomType(rt);
                 rt.getReservations().add(newReservation);
                 // Associate Room Rate
-                RoomRate rr = em.find(RoomRate.class, roomRateId);
-                newReservation.setRoomRate(rr);
-                rr.getReservations().add(newReservation);
+                for(Long roomRateId : roomRateIds)
+                {
+                    RoomRate rr = em.find(RoomRate.class, roomRateId);
+                    newReservation.getRoomRates().add(rr);
+                    rr.getReservations().add(newReservation);
+                }
                 // Associate Customer if applicable
                 if(customerId != null)
                 {
@@ -277,7 +280,7 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
                     counter++;
                 }
             } 
-            else 
+            else if(room.getAvailable())
             {
                 reservation.getRooms().add(room);
                 room.getReservations().add(reservation);

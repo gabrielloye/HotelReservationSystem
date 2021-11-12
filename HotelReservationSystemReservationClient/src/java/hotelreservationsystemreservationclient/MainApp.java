@@ -9,6 +9,7 @@ import entity.Reservation;
 import entity.RoomRate;
 import entity.RoomType;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -243,12 +244,19 @@ public class MainApp {
         if (!availableRoomTypes.isEmpty())
         {
             Integer counter = 1;
-            List<RoomRate> allRoomRates = new ArrayList<>();
+            List<List<RoomRate>> allRoomRates = new ArrayList<>();
+            List<BigDecimal> allPrices = new ArrayList<>();
             for(RoomType roomType : availableRoomTypes)
             {
-                RoomRate chosenRoomRate = getPriorityRoomRate(roomType.getRoomRates());
-                allRoomRates.add(chosenRoomRate);
-                System.out.println(counter + ". " + roomType.getName() + " - Amount : $" + chosenRoomRate.getRatePerNight().multiply(numDays).multiply(new BigDecimal(numRooms)));
+                List<RoomRate> chosenRoomRates = getPriorityRoomRates(roomType.getRoomRates(), startDate, numDays.setScale(0, RoundingMode.HALF_UP).intValue());
+                allRoomRates.add(chosenRoomRates);
+                BigDecimal price = new BigDecimal(0);
+                for(RoomRate roomRate : chosenRoomRates)
+                {
+                    price = price.add(roomRate.getRatePerNight().multiply(new BigDecimal(numRooms)));
+                }
+                allPrices.add(price);
+                System.out.println(counter + ". " + roomType.getName() + " - Amount : $" + price);
                 counter++;
             }
             
@@ -261,7 +269,7 @@ public class MainApp {
                     counter = 1;
                     for(RoomType roomType : availableRoomTypes)
                     {
-                        System.out.println(counter + ". " + roomType.getName() + " - Amount : $" + allRoomRates.get(counter - 1).getRatePerNight().multiply(numDays).multiply(new BigDecimal(numRooms)));
+                        System.out.println(counter + ". " + roomType.getName() + " - Amount : $" + allPrices.get(counter - 1));
                         counter++;
                     }
                 }
@@ -275,7 +283,7 @@ public class MainApp {
                 if(response == 1)
                 {
                     Reservation newReservation = new Reservation(new Date(), startDate, endDate, numRooms, BigDecimal.valueOf(0.0), false, false);
-                    reserveHotelRoom(availableRoomTypes, allRoomRates, newReservation, loggedInGuest.getCustomerId(), numDays);
+                    reserveHotelRoom(availableRoomTypes, allRoomRates, allPrices, newReservation, loggedInGuest.getCustomerId(), numDays);
                     System.out.print("Would you like to reserve another room? Enter 'Y' if yes> ");
                     anotherReservation = scanner.nextLine().trim();
                 }
@@ -295,7 +303,7 @@ public class MainApp {
         }
     }
     
-    private void reserveHotelRoom(List<RoomType> availableRoomTypes, List<RoomRate> allRoomRates, Reservation newReservation, Long customerId, BigDecimal numDays) {
+    private void reserveHotelRoom(List<RoomType> availableRoomTypes, List<List<RoomRate>> allRoomRates, List<BigDecimal> allPrices, Reservation newReservation, Long customerId, BigDecimal numDays) {
         Scanner scanner = new Scanner(System.in);
         
         Integer selectedRoomTypeInt = 0;
@@ -312,14 +320,19 @@ public class MainApp {
             }
         }
         RoomType selectedRoomType = availableRoomTypes.get(selectedRoomTypeInt - 1);
-        RoomRate selectedRoomRate = allRoomRates.get(selectedRoomTypeInt - 1);
+        List<RoomRate> selectedRoomRates = allRoomRates.get(selectedRoomTypeInt - 1);
 
-        BigDecimal numRooms = new BigDecimal(newReservation.getNumRooms());
-        newReservation.setPrice(selectedRoomRate.getRatePerNight().multiply(numDays).multiply(numRooms));
+        newReservation.setPrice(allPrices.get(selectedRoomTypeInt - 1));
+        
+        List<Long> roomRateIds = new ArrayList<>();
+        for(RoomRate roomRate : selectedRoomRates)
+        {
+            roomRateIds.add(roomRate.getRoomRateId());
+        }
 
         try 
         {
-            Long newReservationId = reservationSessionBeanRemote.createNewReservation(newReservation, selectedRoomType.getRoomTypeId(), customerId, selectedRoomRate.getRoomRateId());
+            Long newReservationId = reservationSessionBeanRemote.createNewReservation(newReservation, selectedRoomType.getRoomTypeId(), customerId, roomRateIds);
             System.out.println("New Reservation created with ID: " + newReservationId + "\n");
             Date now = new Date();
             Date today = new Date(now.getYear(), now.getMonth(), now.getDate());
@@ -339,31 +352,36 @@ public class MainApp {
         }
     }
     
-    private RoomRate getPriorityRoomRate(List<RoomRate> roomRates)
+    private List<RoomRate> getPriorityRoomRates(List<RoomRate> roomRates, Date startDate, Integer numDays)
     {
-        List<RoomRate> validRoomRates = new ArrayList<>();
-        for(RoomRate roomRate : roomRates)
-        {
-            if(roomRate.getRateType().equals(RateType.NORMAL))
-            {
-                validRoomRates.add(roomRate);
-            }
-            // If validity end date is after current date and start date before current date
-            else if(!roomRate.getRateType().equals(RateType.PUBLISHED) && // Published only for walk-in
-                (roomRate.getValidityEndDate().after(new Date()) ||
-                roomRate.getValidityStartDate().before(new Date())) )
-            {
-                validRoomRates.add(roomRate);
-            }
-        }
-
         Map<RateType, Integer> ratePriorityMap = new HashMap<>();
         ratePriorityMap.put(RateType.PROMOTION, 1);
         ratePriorityMap.put(RateType.PEAK, 2);
         ratePriorityMap.put(RateType.NORMAL, 3);
-
-        Collections.sort(validRoomRates, (x, y) -> ratePriorityMap.get(x.getRateType()) - ratePriorityMap.get(y.getRateType()));
-        return validRoomRates.get(0); // Assume there is at least 1 valid room rate
+        
+        List<RoomRate> finalRoomRates = new ArrayList<>();
+        for(int i = 0; i < numDays; i++)
+        {
+            Date rangeStart = new Date(startDate.getTime() + i * (1000 * 60 * 60 * 24));
+            Date rangeEnd = new Date(startDate.getTime() + (i + 1) * (1000 * 60 * 60 * 24));
+            List<RoomRate> validRoomRates = new ArrayList<>();
+            for(RoomRate roomRate : roomRates)
+            {
+                if(roomRate.getRateType().equals(RateType.NORMAL))
+                {
+                    validRoomRates.add(roomRate);
+                }
+                else if(!roomRate.getRateType().equals(RateType.PUBLISHED) &&
+                        roomRate.getValidityEndDate().compareTo(rangeStart) >= 0 && // Validity end date needs to be greater or equal to range start date
+                        roomRate.getValidityStartDate().compareTo(rangeEnd) < 0) // Validity start date needs to be before range end
+                {
+                    validRoomRates.add(roomRate);
+                }
+            }
+            Collections.sort(validRoomRates, (x, y) -> ratePriorityMap.get(x.getRateType()) - ratePriorityMap.get(y.getRateType()));
+            finalRoomRates.add(validRoomRates.get(0));// Assume there is at least 1 valid room rate
+        }
+        return finalRoomRates;
     }
     
     private Date enterDate(String dateMessage)

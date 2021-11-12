@@ -51,9 +51,9 @@ public class PartnerWebService {
     }
     
     @WebMethod(operationName = "retrieveAvailableRoomTypes")
-    public List<RoomType> retrieveAvailableRoomTypes(@WebParam(name = "startDate") Date startDate)
+    public List<RoomType> retrieveAvailableRoomTypes(@WebParam(name = "startDate") Date startDate,
+                                                     @WebParam(name = "numRooms") Integer numRooms)
     {
-        int numRooms = 1; //stub
         List<RoomType> roomTypes = roomTypeSessionBeanLocal.retrieveAvailableRoomTypes(startDate, numRooms);
         for(RoomType roomType : roomTypes)
         {
@@ -72,26 +72,12 @@ public class PartnerWebService {
         return roomTypes;
     }
     
-    @WebMethod(operationName = "getMaxNumRoomsForRoomType")
-    public Integer getMaxNumRoomsForRoomType(@WebParam(name = "organisation") String organisation,
-                                             @WebParam(name = "password") String password,
-                                             @WebParam(name = "roomTypeId") Long roomTypeId)
-                    throws InvalidLoginCredentialException
-    {
-        Partner partner = partnerSessionBeanLocal.partnerLogin(organisation, password);
-        System.out.println("********** PartnerWebService.getMaxNumRoomsForRoomType(): Partner " 
-                            + partner.getOrganisation() 
-                            + " login remotely via web service");
-        
-        return roomTypeSessionBeanLocal.getMaxNumRoomsForRoomType(roomTypeId);
-    }
-    
     @WebMethod(operationName = "createNewPartnerReservation")
     public Long createNewPartnerReservation(@WebParam(name = "organisation") String organisation,
                                             @WebParam(name = "password") String password,
                                             @WebParam(name = "newReservation") Reservation newReservation,
                                             @WebParam(name = "roomTypeId") Long roomTypeId,
-                                            @WebParam(name = "roomRateId") Long roomRateId)
+                                            @WebParam(name = "roomRateIds") List<Long> roomRateIds)
                     throws InvalidLoginCredentialException, UnknownPersistenceException, InputDataValidationException
     {
         Partner partner = partnerSessionBeanLocal.partnerLogin(organisation, password);
@@ -99,7 +85,7 @@ public class PartnerWebService {
                             + partner.getOrganisation() 
                             + " login remotely via web service");
         
-        Long reservationId = reservationSessionBeanLocal.createNewReservation(newReservation, roomTypeId, null, roomRateId);
+        Long reservationId = reservationSessionBeanLocal.createNewReservation(newReservation, roomTypeId, null, roomRateIds);
         // Associate partner and reservation
         partnerSessionBeanLocal.associatePartnerAndReservation(partner.getPartnerId(), reservationId);
         
@@ -147,7 +133,7 @@ public class PartnerWebService {
 
         em.detach(reservation);
         reservation.getAllocationExceptionReports().clear();
-        reservation.setRoomRate(null);
+        reservation.getRoomRates().clear();
         reservation.getRooms().clear();
         reservation.setPartner(null);
         reservation.setEmployee(null);
@@ -178,7 +164,7 @@ public class PartnerWebService {
             
             em.detach(reservation);
             reservation.getAllocationExceptionReports().clear();
-            reservation.setRoomRate(null);
+            reservation.getRoomRates().clear();
             reservation.getRooms().clear();
             reservation.setPartner(null);
             reservation.setEmployee(null);

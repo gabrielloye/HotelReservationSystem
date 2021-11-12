@@ -10,6 +10,9 @@ import ejb.session.stateless.RoomSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
 import ejb.session.stateless.TimerSessionBeanRemote;
 import entity.Employee;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 import util.enumeration.EmployeeAccessRight;
 import util.exception.InvalidLoginCredentialException;
@@ -67,6 +70,7 @@ public class MainApp
                 System.out.print("> ");
                 
                 response = scanner.nextInt();
+                scanner.nextLine();
                 
                 if(response == 1)
                 {
@@ -84,8 +88,22 @@ public class MainApp
                 }
                 else if(response == 2)
                 {
-                    timerSessionBeanRemote.useTimer();
-                    System.out.println("Timer Bean Invoked");
+                    while(true)
+                    {
+                        try 
+                        {
+                            System.out.print("Enter Date to Allocate for (dd/mm/yyyy)> ");
+                            Date date = new SimpleDateFormat("dd/MM/yyyy").parse(scanner.nextLine().trim());
+                            timerSessionBeanRemote.allocateRoomForDay(date);
+                            System.out.println("Timer Bean Invoked");
+                            break;
+                        }
+                        catch (ParseException ex) 
+                        {
+                            System.out.println("Date is in wrong format! Please enter in dd/MM/yyyy!: " + ex.getMessage() + "\n");
+                        }
+                    }
+                    
                 }
                 else if(response == 3)
                 {

@@ -208,7 +208,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
                             }
                         }
                     }
-                    else
+                    else if(room.getAvailable())
                     {
                         numRoomsAvailable++;
                         System.out.println("numRoomsAvailable " + numRoomsAvailable + "for Room Type " + rt.getName());

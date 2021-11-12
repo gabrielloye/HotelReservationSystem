@@ -33,7 +33,7 @@ public interface ReservationSessionBeanRemote {
 
     public List<AllocationExceptionReport> getAllocationReportForReservation(Long reservationId);
     
-    public Long createNewReservation(Reservation newReservation, Long roomTypeId, Long customerId, Long roomRateId) throws UnknownPersistenceException, InputDataValidationException;
+    public Long createNewReservation(Reservation newReservation, Long roomTypeId, Long customerId, List<Long> roomRateIds) throws UnknownPersistenceException, InputDataValidationException;
     
     public void associateEmployeeWithReservation(Long employeeId, Long reservationId);
     
