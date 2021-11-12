@@ -291,7 +291,7 @@ public class MainApp {
         }
         else
         {
-            System.out.println("Sorry, no available rooms during the indicated period!");
+            System.out.println("Sorry, no available rooms during the indicated period!\n");
         }
     }
     
@@ -301,7 +301,7 @@ public class MainApp {
         Integer selectedRoomTypeInt = 0;
         while (selectedRoomTypeInt < 1 || selectedRoomTypeInt > availableRoomTypes.size())
         {
-            System.out.println("Which room would you like to reserve?");
+            System.out.println("Which room would you like to reserve?\n");
             System.out.print("Select Option> ");
             selectedRoomTypeInt = scanner.nextInt();
             scanner.nextLine();
@@ -320,13 +320,13 @@ public class MainApp {
         try 
         {
             Long newReservationId = reservationSessionBeanRemote.createNewReservation(newReservation, selectedRoomType.getRoomTypeId(), customerId, selectedRoomRate.getRoomRateId());
-            System.out.println("New Reservation created with ID: " + newReservationId);
+            System.out.println("New Reservation created with ID: " + newReservationId + "\n");
             Date now = new Date();
             Date today = new Date(now.getYear(), now.getMonth(), now.getDate());
             if (newReservation.getStartDate().equals(today) && now.getHours() >= 2)
             {
                 reservationSessionBeanRemote.allocateRoomsForReservationByReservationId(newReservationId);
-                System.out.println("Room has been allocated");
+                System.out.println("Room has been allocated\n");
             }
         }
         catch(UnknownPersistenceException ex)
