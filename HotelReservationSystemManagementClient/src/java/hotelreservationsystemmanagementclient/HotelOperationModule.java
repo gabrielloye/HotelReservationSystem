@@ -29,7 +29,6 @@ import util.exception.RoomTypeExistsException;
 import util.exception.RoomTypeNotFoundException;
 import util.exception.UnknownPersistenceException;
 import util.exception.UpdateRoomException;
-import util.exception.UpdateRoomTypeException;
 
 
 public class HotelOperationModule
@@ -217,17 +216,9 @@ public class HotelOperationModule
             }
         }
         
-        System.out.print("Enter Normal Room Rate> $");
-        BigDecimal normalRate = scanner.nextBigDecimal();
-        scanner.nextLine();
-        
-        System.out.print("Enter Published Room Rate> $");
-        BigDecimal publishedRate = scanner.nextBigDecimal();
-        scanner.nextLine();
-        
         try
         {
-            Long newRoomTypeId = roomTypeSessionBeanRemote.createNewRoomType(newRoomType, lowerRoomTypeId, higherRoomTypeId, normalRate, publishedRate);
+            Long newRoomTypeId = roomTypeSessionBeanRemote.createNewRoomType(newRoomType, lowerRoomTypeId, higherRoomTypeId);
             System.out.println("New Room Type created with ID: " + newRoomTypeId);
         }
         catch(RoomTypeExistsException ex)
@@ -429,6 +420,13 @@ public class HotelOperationModule
         
         System.out.println("\n*** HoRS Management Client :: Operation Manager Menu :: Update Room Type Details\n");
 
+        System.out.print("Enter Name (blank if unchanged)> ");
+        String newName = scanner.nextLine().trim();
+        if(newName.length() > 0)
+        {
+            roomType.setName(newName);
+        }
+        
         System.out.print("Enter Description (blank if unchanged)> ");
         String newDescription = scanner.nextLine().trim();
         if(newDescription.length() > 0)
@@ -595,7 +593,7 @@ public class HotelOperationModule
             roomTypeSessionBeanRemote.updateRoomType(roomType, lowerRoomTypeId, higherRoomTypeId);
             System.out.println("\nRoom Type updated successfully!\n");
         }
-        catch(RoomTypeNotFoundException | UpdateRoomTypeException ex) 
+        catch(RoomTypeNotFoundException ex) 
         {
             System.out.println("\nAn error has occurred while updating Room Type: " + ex.getMessage() + "\n");
         }
