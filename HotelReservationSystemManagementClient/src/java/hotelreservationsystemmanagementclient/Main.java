@@ -31,7 +31,5 @@ public class Main {
     
     public static void main(String[] args) {
         MainApp mainApp = new MainApp(employeeSessionBeanRemote, partnerSessionBeanRemote, roomTypeSessionBeanRemote, timerSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote, customerSessionBeanRemote, reservationSessionBeanRemote);
-        mainApp.runApp();
-    }
     
 }

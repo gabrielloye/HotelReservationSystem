@@ -131,12 +131,12 @@ public class MainApp
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.OPERATIONMANAGER)
         {
-            hotelOperationModule = new HotelOperationModule(roomTypeSessionBeanRemote, roomSessionBeanRemote);
+            hotelOperationModule = new HotelOperationModule(roomTypeSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote);
             hotelOperationModule.operationManagerMenu();
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.SALESMANAGER)
         {
-            hotelOperationModule = new HotelOperationModule();
+            hotelOperationModule = new HotelOperationModule(roomTypeSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote);
             hotelOperationModule.salesManagerMenu();
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.GUESTRELATIONOFFICER)
