@@ -4,7 +4,6 @@ import entity.Reservation;
 import entity.Room;
 import entity.RoomRate;
 import entity.RoomType;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -20,13 +19,11 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import util.enumeration.RateType;
 import util.exception.DeleteRoomTypeException;
 import util.exception.InputDataValidationException;
 import util.exception.RoomTypeExistsException;
 import util.exception.RoomTypeNotFoundException;
 import util.exception.UnknownPersistenceException;
-import util.exception.UpdateRoomTypeException;
 
 @Stateless
 public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeSessionBeanLocal
@@ -48,7 +45,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     }
     
     @Override
-    public Long createNewRoomType(RoomType newRoomType, Long lowerRoomTypeId, Long higherRoomTypeId, BigDecimal normalRate, BigDecimal publishedRate) throws RoomTypeExistsException, UnknownPersistenceException, InputDataValidationException
+    public Long createNewRoomType(RoomType newRoomType, Long lowerRoomTypeId, Long higherRoomTypeId) throws RoomTypeExistsException, UnknownPersistenceException, InputDataValidationException
     {
         Set<ConstraintViolation<RoomType>>constraintViolations = validator.validate(newRoomType);
         
@@ -59,9 +56,6 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
                 em.persist(newRoomType);
                 updateRanks(newRoomType, lowerRoomTypeId, higherRoomTypeId);
                 em.flush();
-                
-                roomRateSessionBeanLocal.createNewRoomRate(new RoomRate(newRoomType.getName() + " Normal", RateType.NORMAL, normalRate), newRoomType.getRoomTypeId());
-                roomRateSessionBeanLocal.createNewRoomRate(new RoomRate(newRoomType.getName() + " Published", RateType.PUBLISHED, publishedRate), newRoomType.getRoomTypeId());
                 
                 return newRoomType.getRoomTypeId();
             }
@@ -141,7 +135,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     }
     
     @Override
-    public void updateRoomType(RoomType roomType, Long lowerRoomTypeId, Long higherRoomTypeId) throws RoomTypeNotFoundException, UpdateRoomTypeException, InputDataValidationException
+    public void updateRoomType(RoomType roomType, Long lowerRoomTypeId, Long higherRoomTypeId) throws RoomTypeNotFoundException, InputDataValidationException
     {
         if(roomType != null && roomType.getRoomTypeId() != null)
         {
@@ -151,21 +145,15 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
             {
                 RoomType roomTypeToUpdate = retrieveRoomTypeByRoomTypeId(roomType.getRoomTypeId(), false, false, false);
              
-                if(roomTypeToUpdate.getName().equals(roomType.getName()))
-                {
-                    // Updates here, room type name cannot be updated through this method
-                    roomTypeToUpdate.setDescription(roomType.getDescription());
-                    roomTypeToUpdate.setSize(roomType.getSize());
-                    roomTypeToUpdate.setBeds(roomType.getBeds());
-                    roomTypeToUpdate.setCapacity(roomType.getCapacity());
-                    roomTypeToUpdate.setAmenities(roomType.getAmenities());
-                    roomTypeToUpdate.setDisabled(roomType.getDisabled());
-                    updateRanks(roomTypeToUpdate, lowerRoomTypeId, higherRoomTypeId);
-                }
-                else
-                {
-                    throw new UpdateRoomTypeException("Name of room type record to be updated does not match the existing record!");
-                }
+                // Updates here, room type name cannot be updated through this method
+                roomTypeToUpdate.setName(roomType.getName());
+                roomTypeToUpdate.setDescription(roomType.getDescription());
+                roomTypeToUpdate.setSize(roomType.getSize());
+                roomTypeToUpdate.setBeds(roomType.getBeds());
+                roomTypeToUpdate.setCapacity(roomType.getCapacity());
+                roomTypeToUpdate.setAmenities(roomType.getAmenities());
+                roomTypeToUpdate.setDisabled(roomType.getDisabled());
+                updateRanks(roomTypeToUpdate, lowerRoomTypeId, higherRoomTypeId);
             }
             else
             {
@@ -265,11 +253,30 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     {
         RoomType roomTypeToDelete = retrieveRoomTypeByRoomTypeId(roomTypeId, false, false, false);
         
-        if(roomTypeToDelete.getRooms().isEmpty())
+        if(roomTypeToDelete.getRooms().isEmpty() && roomTypeToDelete.getReservations().isEmpty())
         {
+            if(roomTypeToDelete.getLowerRoomType() != null && roomTypeToDelete.getHigherRoomType() != null)
+            {
+                RoomType lowerRoomType = roomTypeToDelete.getLowerRoomType();
+                RoomType higherRoomType = roomTypeToDelete.getHigherRoomType();
+                lowerRoomType.setHigherRoomType(higherRoomType);
+                higherRoomType.setLowerRoomType(lowerRoomType);
+                roomTypeToDelete.setLowerRoomType(null);
+                roomTypeToDelete.setHigherRoomType(null);
+            }
+            else if(roomTypeToDelete.getLowerRoomType() != null)
+            {
+                roomTypeToDelete.getLowerRoomType().setHigherRoomType(null);
+                roomTypeToDelete.setLowerRoomType(null);
+            }
+            else if(roomTypeToDelete.getHigherRoomType() != null)
+            {
+                roomTypeToDelete.getHigherRoomType().setLowerRoomType(null);
+                roomTypeToDelete.setHigherRoomType(null);
+            }
+            
             for(RoomRate roomRate : roomTypeToDelete.getRoomRates())
             {
-                roomRate.setRoomType(null);
                 em.remove(roomRate);
             }
             roomTypeToDelete.getRoomRates().clear();
@@ -277,7 +284,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         }
         else
         {
-            throw new DeleteRoomTypeException("Room Type " + roomTypeToDelete.getName() + " is associated with existing room(s) and cannot be deleted!");
+            throw new DeleteRoomTypeException("Room Type " + roomTypeToDelete.getName() + " is associated with existing room(s)/reservation(s) and cannot be deleted!");
         }
     }
     

@@ -20,6 +20,7 @@ import javax.persistence.PersistenceContext;
 import util.exception.InputDataValidationException;
 import util.exception.InvalidLoginCredentialException;
 import util.exception.ReservationExistsException;
+import util.exception.ReservationNotFoundException;
 import util.exception.UnknownPersistenceException;
 
 
@@ -117,6 +118,41 @@ public class PartnerWebService {
                             + " login remotely via web service");
         
         reservationSessionBeanLocal.allocateRoomsForReservationByReservationId(reservationId);
+    }
+    
+    @WebMethod(operationName = "viewPartnerReservationDetails")
+    public Reservation viewPartnerReservationDetails(@WebParam(name = "organisation") String organisation,
+                                                     @WebParam(name = "password") String password,
+                                                     @WebParam(name = "reservationId") Long reservationId)
+                    throws InvalidLoginCredentialException, ReservationNotFoundException
+    {
+        Partner partner = partnerSessionBeanLocal.partnerLogin(organisation, password);
+        System.out.println("********** PartnerWebService.viewPartnerReservationDetails(): Partner " 
+                            + partner.getOrganisation() 
+                            + " login remotely via web service");
+        
+        
+        Reservation reservation = reservationSessionBeanLocal.retrieveReservationByReservationId(reservationId, false, false);
+        if(reservation.getPartner() == null || !reservation.getPartner().getPartnerId().equals(partner.getPartnerId()))
+        {
+            throw new ReservationNotFoundException("This reservation does not belong to Parter: " + partner.getOrganisation());
+        }
+        RoomType roomType = reservation.getRoomType();
+        em.detach(roomType);
+        roomType.getRooms().clear();
+        roomType.getReservations().clear();
+        roomType.getRoomRates().clear();
+        roomType.setLowerRoomType(null);
+        roomType.setHigherRoomType(null);
+
+        em.detach(reservation);
+        reservation.getAllocationExceptionReports().clear();
+        reservation.setRoomRate(null);
+        reservation.getRooms().clear();
+        reservation.setPartner(null);
+        reservation.setEmployee(null);
+        reservation.setCustomer(null);
+        return reservation;
     }
     
     @WebMethod(operationName = "viewAllPartnerReservations")
