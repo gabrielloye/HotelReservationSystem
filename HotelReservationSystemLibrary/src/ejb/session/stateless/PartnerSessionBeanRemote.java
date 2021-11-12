@@ -17,4 +17,6 @@ public interface PartnerSessionBeanRemote {
     
     public Partner partnerLogin(String organisation, String password) throws InvalidLoginCredentialException;
     
+    public void associatePartnerAndReservation(Long partnerId, Long reservationId);
+    
 }

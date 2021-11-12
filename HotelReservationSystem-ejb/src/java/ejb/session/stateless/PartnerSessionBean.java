@@ -1,6 +1,7 @@
 package ejb.session.stateless;
 
 import entity.Partner;
+import entity.Reservation;
 import java.util.List;
 import java.util.Set;
 import javax.ejb.Stateless;
@@ -118,6 +119,16 @@ public class PartnerSessionBean implements PartnerSessionBeanRemote, PartnerSess
         {
             throw new InvalidLoginCredentialException("Organisation does not exist or invalid password!");
         }
+    }
+    
+    @Override
+    public void associatePartnerAndReservation(Long partnerId, Long reservationId)
+    {
+        Partner partner = em.find(Partner.class, partnerId);
+        Reservation reservation = em.find(Reservation.class, reservationId);
+        
+        partner.getReservations().add(reservation);
+        reservation.setPartner(partner);
     }
     
     private String prepareInputDataValidationErrorsMessage(Set<ConstraintViolation<Partner>>constraintViolations)

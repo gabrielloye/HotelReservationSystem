@@ -16,5 +16,7 @@ public interface PartnerSessionBeanLocal {
     public List<Partner> retrieveAllPartners();
     
     public Partner partnerLogin(String organisation, String password) throws InvalidLoginCredentialException;
+
+    public void associatePartnerAndReservation(Long partnerId, Long reservationId);
     
 }

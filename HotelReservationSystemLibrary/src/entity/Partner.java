@@ -10,13 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import util.enumeration.PartnerAccessRight;
 
 
 @Entity
@@ -28,9 +25,6 @@ public class Partner implements Serializable {
     private Long partnerId;
     @Column(nullable = false, length = 64, unique = true)
     private String organisation;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PartnerAccessRight accessRight;
     @Column(nullable = false, length = 64)
     private String password;
 
@@ -41,10 +35,9 @@ public class Partner implements Serializable {
         this.reservations = new ArrayList<>();
     }
 
-    public Partner(String organisation, PartnerAccessRight accessRight, String password) {
+    public Partner(String organisation, String password) {
         this();
         this.organisation = organisation;
-        this.accessRight = accessRight;
         this.password = password;
     }
 
@@ -93,20 +86,6 @@ public class Partner implements Serializable {
      */
     public void setOrganisation(String organisation) {
         this.organisation = organisation;
-    }
-
-    /**
-     * @return the accessRight
-     */
-    public PartnerAccessRight getAccessRight() {
-        return accessRight;
-    }
-
-    /**
-     * @param accessRight the accessRight to set
-     */
-    public void setAccessRight(PartnerAccessRight accessRight) {
-        this.accessRight = accessRight;
     }
 
     /**

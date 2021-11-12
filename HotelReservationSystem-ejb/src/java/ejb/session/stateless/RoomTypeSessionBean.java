@@ -178,9 +178,10 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         }
     }
     
+    @Override
     public List<RoomType> retrieveAvailableRoomTypes(Date startDate)
     {
-        Query query = em.createQuery("SELECT DISTINCT rt FROM RoomType rt JOIN rt.roomRates rr WHERE rr.rateType = util.enumeration.RateType.PUBLISHED");
+        Query query = em.createQuery("SELECT DISTINCT rt FROM RoomType rt");
         List<RoomType> roomTypes = query.getResultList();
         
         List<RoomType> availableRoomTypes = new ArrayList<>();

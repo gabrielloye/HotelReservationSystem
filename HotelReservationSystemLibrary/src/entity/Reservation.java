@@ -47,8 +47,8 @@ public class Reservation implements Serializable {
     @Column(nullable = false)
     private Boolean checkOut;
     
-    @ManyToOne(optional = false)
-    @JoinColumn(nullable = false)
+    @ManyToOne(optional = true)
+    @JoinColumn(nullable = true)
     private Customer customer;
     
     @ManyToOne(optional = true)
@@ -75,6 +75,8 @@ public class Reservation implements Serializable {
 
     public Reservation()
     {
+        this.checkIn = false;
+        this.checkOut = false;
         this.allocationExceptionReports = new ArrayList<>();
         this.rooms = new ArrayList<>();
     }

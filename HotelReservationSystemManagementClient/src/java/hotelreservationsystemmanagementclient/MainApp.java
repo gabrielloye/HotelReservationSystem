@@ -82,6 +82,8 @@ public class MainApp
                 else if(response == 2)
                 {
                     timerSessionBeanRemote.useTimer();
+                    System.out.println("Timer Bean Invoked");
+                    response = 0;
                 }
                 else if(response == 3)
                 {
@@ -93,7 +95,7 @@ public class MainApp
                 }
             }
             
-            if(response == 2)
+            if(response == 3)
             {
                 break;
             }

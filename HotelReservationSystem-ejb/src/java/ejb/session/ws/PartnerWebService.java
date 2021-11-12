@@ -2,25 +2,40 @@ package ejb.session.ws;
 
 import ejb.session.stateless.PartnerSessionBeanLocal;
 import ejb.session.stateless.ReservationSessionBeanLocal;
+import ejb.session.stateless.RoomTypeSessionBeanLocal;
 import entity.Partner;
 import entity.Reservation;
+import entity.Room;
+import entity.RoomRate;
+import entity.RoomType;
+import java.util.Date;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import util.exception.InputDataValidationException;
 import util.exception.InvalidLoginCredentialException;
+import util.exception.ReservationExistsException;
+import util.exception.UnknownPersistenceException;
 
 
 @WebService(serviceName = "PartnerWebService")
 @Stateless()
 public class PartnerWebService {
+    
+    @PersistenceContext(unitName = "HotelReservationSystem-ejbPU")
+    private EntityManager em;
 
     @EJB
     private PartnerSessionBeanLocal partnerSessionBeanLocal;
     @EJB
     private ReservationSessionBeanLocal reservationSessionBeanLocal;
+    @EJB
+    private RoomTypeSessionBeanLocal roomTypeSessionBeanLocal;
     
     @WebMethod(operationName = "partnerLogin")
     public Partner partnerLogin(@WebParam(name = "organisation") String organisation,
@@ -28,8 +43,79 @@ public class PartnerWebService {
                     throws InvalidLoginCredentialException
     {
         Partner partner = partnerSessionBeanLocal.partnerLogin(organisation, password);
+        em.detach(partner);
+        partner.getReservations().clear();
         System.out.println("********** PartnerWebService.partnerLogin(): Partner " + partner.getOrganisation() + " login remotely via web service");
         return partner;
+    }
+    
+    @WebMethod(operationName = "retrieveAvailableRoomTypes")
+    public List<RoomType> retrieveAvailableRoomTypes(@WebParam(name = "startDate") Date startDate)
+    {
+        List<RoomType> roomTypes = roomTypeSessionBeanLocal.retrieveAvailableRoomTypes(startDate);
+        for(RoomType roomType : roomTypes)
+        {
+            for(RoomRate roomRate : roomType.getRoomRates())
+            {
+                em.detach(roomRate);
+                roomRate.setRoomType(null);
+                roomRate.getReservations().clear();
+            }
+            em.detach(roomType);
+            roomType.getRooms().clear();
+            roomType.getReservations().clear();
+            roomType.setLowerRoomType(null);
+            roomType.setHigherRoomType(null);
+        }
+        return roomTypes;
+    }
+    
+    @WebMethod(operationName = "getMaxNumRoomsForRoomType")
+    public Integer getMaxNumRoomsForRoomType(@WebParam(name = "organisation") String organisation,
+                                             @WebParam(name = "password") String password,
+                                             @WebParam(name = "roomTypeId") Long roomTypeId)
+                    throws InvalidLoginCredentialException
+    {
+        Partner partner = partnerSessionBeanLocal.partnerLogin(organisation, password);
+        System.out.println("********** PartnerWebService.getMaxNumRoomsForRoomType(): Partner " 
+                            + partner.getOrganisation() 
+                            + " login remotely via web service");
+        
+        return roomTypeSessionBeanLocal.getMaxNumRoomsForRoomType(roomTypeId);
+    }
+    
+    @WebMethod(operationName = "createNewPartnerReservation")
+    public Long createNewPartnerReservation(@WebParam(name = "organisation") String organisation,
+                                            @WebParam(name = "password") String password,
+                                            @WebParam(name = "newReservation") Reservation newReservation,
+                                            @WebParam(name = "roomTypeId") Long roomTypeId,
+                                            @WebParam(name = "roomRateId") Long roomRateId)
+                    throws InvalidLoginCredentialException, UnknownPersistenceException, InputDataValidationException
+    {
+        Partner partner = partnerSessionBeanLocal.partnerLogin(organisation, password);
+        System.out.println("********** PartnerWebService.createNewPartnerReservation(): Partner " 
+                            + partner.getOrganisation() 
+                            + " login remotely via web service");
+        
+        Long reservationId = reservationSessionBeanLocal.createNewReservation(newReservation, roomTypeId, null, roomRateId);
+        // Associate partner and reservation
+        partnerSessionBeanLocal.associatePartnerAndReservation(partner.getPartnerId(), reservationId);
+        
+        return reservationId;
+    }
+    
+    @WebMethod(operationName = "allocateRoomsForReservationByReservationId")
+    public void allocateRoomsForReservationByReservationId(@WebParam(name = "organisation") String organisation,
+                                                           @WebParam(name = "password") String password,
+                                                           @WebParam(name = "reservationId") Long reservationId)
+                        throws InvalidLoginCredentialException
+    {
+        Partner partner = partnerSessionBeanLocal.partnerLogin(organisation, password);
+        System.out.println("********** PartnerWebService.allocateRoomsForReservationByReservationId(): Partner " 
+                            + partner.getOrganisation() 
+                            + " login remotely via web service");
+        
+        reservationSessionBeanLocal.allocateRoomsForReservationByReservationId(reservationId);
     }
     
     @WebMethod(operationName = "viewAllPartnerReservations")
@@ -42,6 +128,25 @@ public class PartnerWebService {
                             + partner.getOrganisation() 
                             + " login remotely via web service");
         
-        return reservationSessionBeanLocal.retrieveReservationsForPartner(partner.getPartnerId());
+        List<Reservation> reservations = reservationSessionBeanLocal.retrieveReservationsForPartner(partner.getPartnerId());
+        for(Reservation reservation : reservations)
+        {
+            RoomType roomType = reservation.getRoomType();
+            em.detach(roomType);
+            roomType.getRooms().clear();
+            roomType.getReservations().clear();
+            roomType.getRoomRates().clear();
+            roomType.setLowerRoomType(null);
+            roomType.setHigherRoomType(null);
+            
+            em.detach(reservation);
+            reservation.getAllocationExceptionReports().clear();
+            reservation.setRoomRate(null);
+            reservation.getRooms().clear();
+            reservation.setPartner(null);
+            reservation.setEmployee(null);
+            reservation.setCustomer(null);
+        }
+        return reservations;
     }
 }
