@@ -53,30 +53,7 @@ public class TimerSessionBean implements TimerSessionBeanRemote, TimerSessionBea
         List<Reservation> todayReservations = reservationSessionBeanLocal.retrieveReservationsWithStartDate(today);
         for(Reservation reservation : todayReservations)
         {
-            RoomType reservationRoomType = roomTypeSessionBeanLocal.retrieveRoomTypeByRoomTypeId(reservation.getRoomType().getRoomTypeId(), true, false, false);
-            List<Room> roomsWithRoomType = reservationRoomType.getRooms();
-            
-            Integer numRooms = reservation.getNumRooms();
-            int counter = 0;
-            
-            counter = allocateRooms(reservation, roomsWithRoomType, counter, numRooms, today); //allocation with no exceptions
-            
-            if (counter < numRooms) //not finished allocating yet, still need to upgrade/unavailable
-            {
-                if (reservationRoomType.getHigherRoomType() != null) //if theres a higher roomType
-                {
-                    RoomType nextHigherRoomType = roomTypeSessionBeanLocal.retrieveRoomTypeByRoomTypeId(reservationRoomType.getHigherRoomType().getRoomTypeId(), true, false, false);
-                    List<Room> roomsWithHigherRoomType = nextHigherRoomType.getRooms();
-                        
-                    counter = allocateRoomsWithUpgradedException(reservation ,roomsWithHigherRoomType, counter, numRooms, today);
-
-                    allocateRoomsWithUnavailableException(reservation, counter, numRooms); //allocate all remaining as unavailable
-                }  
-                else //if no higher roomType
-                {
-                    allocateRoomsWithUnavailableException(reservation, counter, numRooms); //allocate all remaining as unavailable
-                }
-            }
+            reservationSessionBeanLocal.allocateRoomsForReservationByReservationId(reservation.getReservationId());
         }
     }
     
@@ -85,98 +62,5 @@ public class TimerSessionBean implements TimerSessionBeanRemote, TimerSessionBea
     public void useTimer()
     {
         currentDayRoomAllocationTimer();
-    }
-    
-    private int allocateRooms(Reservation reservation, List<Room> roomsWithRoomType, int counter, int numRooms, Date today)
-    {
-        for (Room room : roomsWithRoomType) 
-        {
-            List<Reservation> roomReservations = room.getReservations();
-            if (!roomReservations.isEmpty())
-            {
-                Reservation latestReservation = roomReservations.get(roomReservations.size() - 1);
-                if (room.getAvailable() && (latestReservation.getEndDate().before(today) || latestReservation.getEndDate().equals(today))) 
-                {
-                    reservation.getRooms().add(room);
-                    room.getReservations().add(reservation);
-                    System.out.println(String.format("Room %s allocated to Reservation %s", room.getRoomNumber(), reservation.getReservationId()));
-                    counter++;
-                }
-            } 
-            else 
-            {
-                reservation.getRooms().add(room);
-                room.getReservations().add(reservation);
-                System.out.println(String.format("Room %s allocated to Reservation %s", room.getRoomNumber(), reservation.getReservationId()));
-                counter++;
-            }
-            if (counter == numRooms)
-            {
-                break;
-            }
-        }
-        return counter;
-    }
-    
-    private int allocateRoomsWithUpgradedException(Reservation reservation, List<Room> roomsWithHigherRoomType, int counter, int numRooms, Date today)
-    {
-        for (Room room : roomsWithHigherRoomType) 
-        {
-            List<Reservation> roomReservations = room.getReservations();
-            if (!roomReservations.isEmpty())
-            {
-                Reservation latestReservation = roomReservations.get(roomReservations.size() - 1);
-                if (room.getAvailable() && (latestReservation.getEndDate().before(today) || latestReservation.getEndDate().equals(today))) 
-                {
-                    reservation.getRooms().add(room);
-                    room.getReservations().add(reservation);
-
-                    AllocationExceptionReport allocationExceptionReport = new AllocationExceptionReport(AllocationExceptionType.UPGRADED, new Date());
-                    em.persist(allocationExceptionReport);
-                    allocationExceptionReport.setReservation(reservation);
-                    reservation.getAllocationExceptionReports().add(allocationExceptionReport);
-                    em.flush();
-
-                    System.out.println(String.format("Room %s allocated to Reservation %s", room.getRoomNumber(), reservation.getReservationId()));
-                    System.out.println("UPGRADED Allocation Exception Report Generated : " + allocationExceptionReport.getAllocationExceptionReportId());
-                    counter++;
-                }
-            } 
-            else 
-            {
-                AllocationExceptionReport allocationExceptionReport = new AllocationExceptionReport(AllocationExceptionType.UPGRADED, new Date());
-                em.persist(allocationExceptionReport);
-                allocationExceptionReport.setReservation(reservation);
-                reservation.getAllocationExceptionReports().add(allocationExceptionReport);
-                em.flush();
-                reservation.getRooms().add(room);
-                room.getReservations().add(reservation);
-                System.out.println(String.format("Room %s allocated to Reservation %s", room.getRoomNumber(), reservation.getReservationId()));
-                System.out.println("UPGRADED Allocation Exception Report Generated : " + allocationExceptionReport.getAllocationExceptionReportId());
-                counter++;
-            }
-
-            if (counter == numRooms)
-            {
-                break;
-            }
-        }
-        return counter;
-    }
-    
-    private void allocateRoomsWithUnavailableException(Reservation reservation, int counter, int numRooms)
-    {
-        while (counter < numRooms)
-        {
-            AllocationExceptionReport allocationExceptionReport = new AllocationExceptionReport(AllocationExceptionType.UNAVAILABLE, new Date());
-            em.persist(allocationExceptionReport);
-            allocationExceptionReport.setReservation(reservation);
-            reservation.getAllocationExceptionReports().add(allocationExceptionReport);
-            em.flush();
-
-            System.out.println("No room available for allocation for Reservation " + reservation.getReservationId());
-            System.out.println("UNAVAILABLE Allocation Exception Report Generated : " + allocationExceptionReport.getAllocationExceptionReportId());
-            counter++;
-        }
     }
 }

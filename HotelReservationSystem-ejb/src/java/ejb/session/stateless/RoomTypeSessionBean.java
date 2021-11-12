@@ -1,10 +1,12 @@
 package ejb.session.stateless;
 
+import entity.Reservation;
 import entity.Room;
 import entity.RoomRate;
 import entity.RoomType;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import javax.ejb.EJB;
@@ -176,6 +178,51 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         }
     }
     
+    public List<RoomType> retrieveAvailableRoomTypes(Date startDate)
+    {
+        Query query = em.createQuery("SELECT DISTINCT rt FROM RoomType rt JOIN rt.roomRates rr WHERE rr.rateType = util.enumeration.RateType.PUBLISHED");
+        List<RoomType> roomTypes = query.getResultList();
+        
+        List<RoomType> availableRoomTypes = new ArrayList<>();
+        
+        for (RoomType rt : roomTypes)
+        {
+            for (Room room : rt.getRooms()) 
+            {
+                List<Reservation> roomReservations = room.getReservations();
+                if (!roomReservations.isEmpty()) 
+                {
+                    boolean roomAllocated = false;
+                
+                    for (Reservation res : roomReservations)
+                    {
+                        if (res.getEndDate().after(startDate))
+                        {
+                            roomAllocated = true;
+                            break;
+                        }
+                    }
+                    
+                    if (room.getAvailable() && !roomAllocated) 
+                    {
+                        rt.getRoomRates().size();
+                        availableRoomTypes.add(rt);
+                        break;
+                    }
+                }
+                else
+                {
+                    rt.getRoomRates().size();
+                    availableRoomTypes.add(rt);
+                    break;
+                }
+            }
+        }
+        
+        return availableRoomTypes;
+    }
+    
+    
     private void updateRanks(RoomType newRoomType, Long lowerRoomTypeId, Long higherRoomTypeId)
     {
         if(lowerRoomTypeId != null)
@@ -217,6 +264,20 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     {
         RoomType roomTypeToDisable = retrieveRoomTypeByRoomTypeId(roomTypeId, false, false, false);
         roomTypeToDisable.setDisabled(true);
+    }
+    
+    public int getMaxNumRoomsForRoomType(Long roomTypeId)
+    {
+        RoomType roomType = em.find(RoomType.class, roomTypeId);
+        int maxNumRooms = 0;
+        for (Room room : roomType.getRooms())
+        {
+            if(room.getAvailable())
+            {
+                maxNumRooms++;
+            }
+        }
+        return maxNumRooms;
     }
     
     private String prepareInputDataValidationErrorsMessage(Set<ConstraintViolation<RoomType>>constraintViolations)

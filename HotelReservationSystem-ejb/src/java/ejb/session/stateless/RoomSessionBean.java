@@ -93,6 +93,33 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
     }
     
     @Override
+    public boolean earlyCheckIn(List<Room> rooms)
+    {
+        Date now = new Date();
+        Date today = new Date(now.getYear(), now.getMonth(), now.getDate());
+        if (now.getHours() < 14)
+        {
+            for (Room rm : rooms)
+            {
+                Room room = em.find(Room.class, rm.getRoomId());
+                List<Reservation> roomReservations = room.getReservations();
+                for (Reservation reservation : roomReservations)
+                {
+                    if (reservation.getEndDate().equals(today))
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    
+    @Override
     public Room retrieveRoomByRoomId(Long roomId, Boolean loadReservations)
     {
         Room room = em.find(Room.class, roomId);

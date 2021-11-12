@@ -27,5 +27,9 @@ public interface RoomTypeSessionBeanLocal {
     public void disableRoomType(Long roomTypeId);
     
     public RoomType retrieveRoomTypeByRoomTypeId(Long roomTypeId, Boolean loadRooms, Boolean loadReservations, Boolean loadRoomRates);
+
+    public List<RoomType> retrieveAvailableRoomTypes(Date startDate);
+
+    public int getMaxNumRoomsForRoomType(Long roomTypeId);
     
 }
