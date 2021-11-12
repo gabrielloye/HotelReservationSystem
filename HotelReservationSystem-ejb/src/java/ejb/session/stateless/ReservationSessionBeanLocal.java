@@ -23,6 +23,9 @@ public interface ReservationSessionBeanLocal {
 
     public List<Reservation> retrieveReservationsWithStartDate(Date startDate);
 
+
+    public List<Reservation> retrieveReservationsForPartner(Long partnerId);
+
     public void checkOutReservation(Long reservationId) throws CheckedOutException;
 
     public void checkInReservation(Long reservationId) throws CheckedInException;
@@ -31,7 +34,7 @@ public interface ReservationSessionBeanLocal {
 
     public List<AllocationExceptionReport> getAllocationReportForReservation(Long reservationId);
 
-    public Long createNewReservation(Reservation newReservation, Long roomTypeId, Long customerId) throws ReservationExistsException, UnknownPersistenceException, InputDataValidationException;
+    public Long createNewReservation(Reservation newReservation, Long roomTypeId, Long customerId, Long roomRateId) throws UnknownPersistenceException, InputDataValidationException;
 
     public void associateEmployeeWithReservation(Long employeeId, Long reservationId);
 

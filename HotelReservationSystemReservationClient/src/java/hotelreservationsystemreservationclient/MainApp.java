@@ -238,7 +238,7 @@ public class MainApp {
             try {
                 Reservation reservation = reservationSessionBeanRemote.retrieveReservationByReservationId(reservationId);
                 System.out.println("ID: " + reservation.getReservationId());
-                System.out.println("Reservation Date: " + formatDate(reservation.getStartDate()));
+                System.out.println("Reservation Date: " + formatDate(reservation.getReservationDate()));
                 System.out.println("Room Type: " + reservation.getRoomType().getName());
                 System.out.println("Start Date: " + formatDate(reservation.getStartDate()));
                 System.out.println("End Date: " + formatDate(reservation.getEndDate()));

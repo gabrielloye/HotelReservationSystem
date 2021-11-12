@@ -120,22 +120,22 @@ public class FrontOfficeModule
                 System.out.println("End Date must be after Start Date! Try Again!");
             }
         }
-        
+        long timeDiff = endDate.getTime() - startDate.getTime();
+        BigDecimal numDays = new BigDecimal((timeDiff / (1000 * 60 * 60 * 24)));
+                
         List<RoomType> availableRoomTypes = roomTypeSessionBeanRemote.retrieveAvailableRoomTypes(startDate);
         
         if (!availableRoomTypes.isEmpty())
         {
-            List<BigDecimal> amountForRoomTypes = new ArrayList<>();
+            List<RoomRate> allRoomRates = new ArrayList<>();
 
             for(int i = 0; i < availableRoomTypes.size(); i++)
             {
                 List<RoomRate> roomRates = availableRoomTypes.get(i).getRoomRates();
 
                 RoomRate pubRoomRate = getPublishedRoomRateFromList(roomRates);
-                long timeDiff = endDate.getTime() - startDate.getTime();
-                BigDecimal numDays = new BigDecimal((timeDiff / (1000 * 60 * 60 * 24)));
-                amountForRoomTypes.add(pubRoomRate.getRatePerNight().multiply(numDays));
-                System.out.println((i+1) + ". " + availableRoomTypes.get(i).getName() + " - Amount : $" + amountForRoomTypes.get(i).toString());
+                allRoomRates.add(pubRoomRate);
+                System.out.println((i+1) + ". " + availableRoomTypes.get(i).getName() + " - Amount : $" + pubRoomRate.getRatePerNight().multiply(numDays).toString());
             }
 
             Integer response = 0;
@@ -147,7 +147,7 @@ public class FrontOfficeModule
                 {
                     for(int i = 0; i < availableRoomTypes.size(); i++)
                     {
-                        System.out.println((i+1) + ". " + availableRoomTypes.get(i).getName() + " - Amount : $" + amountForRoomTypes.get(i).toString());
+                        System.out.println((i+1) + ". " + availableRoomTypes.get(i).getName() + " - Amount : $" + allRoomRates.get(i).getRatePerNight().multiply(numDays).toString());
                     }
                 }
                 System.out.println("Would you like to reserve a room from this list?");
@@ -160,7 +160,7 @@ public class FrontOfficeModule
                 if(response == 1)
                 {
                     Reservation newReservation = new Reservation(new Date(), startDate, endDate, 0, BigDecimal.valueOf(0.0), false, false);
-                    customerId = walkInReserveRoom(availableRoomTypes, amountForRoomTypes, newReservation, customerId);
+                    customerId = walkInReserveRoom(availableRoomTypes, allRoomRates, newReservation, customerId, numDays);
                     System.out.print("Would you like to reserve another room? Enter 'Y' if yes> ");
                     anotherReservation = scanner.nextLine().trim();
                 }
@@ -178,24 +178,25 @@ public class FrontOfficeModule
         }
     }
     
-    private Long walkInReserveRoom(List<RoomType> availableRoomTypes, List<BigDecimal> amountForRoomTypes, Reservation newReservation, Long customerId) {
+    private Long walkInReserveRoom(List<RoomType> availableRoomTypes, List<RoomRate> allRoomRates, Reservation newReservation, Long customerId, BigDecimal numDays) {
         Scanner scanner = new Scanner(System.in);
         
-        Integer selectedRoomType = 0;
-        while (selectedRoomType < 1 || selectedRoomType > availableRoomTypes.size())
+        Integer selectedRoomTypeInt = 0;
+        while (selectedRoomTypeInt < 1 || selectedRoomTypeInt > availableRoomTypes.size())
         {
             System.out.println("Which room would you like to reserve?");
             System.out.print("Select Option> ");
-            selectedRoomType = scanner.nextInt();
+            selectedRoomTypeInt = scanner.nextInt();
             scanner.nextLine();
             
-            if(selectedRoomType < 1 || selectedRoomType > availableRoomTypes.size())
+            if(selectedRoomTypeInt < 1 || selectedRoomTypeInt > availableRoomTypes.size())
             {
-            System.out.println("Invalid option, please try again!\n");
+                System.out.println("Invalid option, please try again!\n");
             }
         }
-        
-        int maxNumRooms = roomTypeSessionBeanRemote.getMaxNumRoomsForRoomType(availableRoomTypes.get(selectedRoomType - 1).getRoomTypeId());
+        RoomType selectedRoomType = availableRoomTypes.get(selectedRoomTypeInt - 1);
+        RoomRate selectedRoomRate = allRoomRates.get(selectedRoomTypeInt - 1);
+        int maxNumRooms = roomTypeSessionBeanRemote.getMaxNumRoomsForRoomType(selectedRoomType.getRoomTypeId());
 
         Integer response = 0;
         while (response < 1 || response > maxNumRooms)
@@ -222,11 +223,11 @@ public class FrontOfficeModule
 
         BigDecimal numRooms = new BigDecimal(response);
         newReservation.setNumRooms(response);
-        newReservation.setPrice(amountForRoomTypes.get(selectedRoomType - 1).multiply(numRooms));
-        //add roomRate here!
+        newReservation.setPrice(selectedRoomRate.getRatePerNight().multiply(numDays).multiply(numRooms));
 
-        try {
-            Long newReservationId = reservationSessionBeanRemote.createNewReservation(newReservation, availableRoomTypes.get(selectedRoomType - 1).getRoomTypeId(), customerId);
+        try 
+        {
+            Long newReservationId = reservationSessionBeanRemote.createNewReservation(newReservation, selectedRoomType.getRoomTypeId(), customerId, selectedRoomRate.getRoomRateId());
             reservationSessionBeanRemote.associateEmployeeWithReservation(loggedInEmployee.getEmployeeId(), newReservationId);
             System.out.println("New Reservation created with ID: " + newReservationId);
             Date now = new Date();
@@ -234,11 +235,8 @@ public class FrontOfficeModule
             if (newReservation.getStartDate().equals(today) && now.getHours() >= 2)
             {
                 reservationSessionBeanRemote.allocateRoomsForReservationByReservationId(newReservationId);
+                System.out.println("Room has been allocated");
             }
-        }
-        catch(ReservationExistsException ex) //will this happen? no unique fields in reservation
-        {
-            System.out.println("An error has occurred while creating the new reservation: It already exists!\n");
         }
         catch(UnknownPersistenceException ex)
         {

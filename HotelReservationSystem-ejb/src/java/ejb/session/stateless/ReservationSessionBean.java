@@ -11,6 +11,7 @@ import entity.Employee;
 import entity.Partner;
 import entity.Reservation;
 import entity.Room;
+import entity.RoomRate;
 import entity.RoomType;
 import java.util.Date;
 import java.util.List;
@@ -102,6 +103,17 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
     }
     
     @Override
+    public List<Reservation> retrieveReservationsForPartner(Long partnerId)
+    {
+        Query query = em.createQuery("SELECT r FROM Reservation r WHERE r.partner.partnerId = :partnerId");
+        query.setParameter("partnerId", partnerId);
+        
+        List<Reservation> reservations = query.getResultList();
+        
+        return reservations;
+    }
+
+    @Override
     public void checkOutReservation(Long reservationId) throws CheckedOutException
     {
         Reservation reservation = em.find(Reservation.class, reservationId);
@@ -146,7 +158,7 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
     }
     
     @Override
-    public Long createNewReservation(Reservation newReservation, Long roomTypeId, Long customerId) throws ReservationExistsException, UnknownPersistenceException, InputDataValidationException
+    public Long createNewReservation(Reservation newReservation, Long roomTypeId, Long customerId, Long roomRateId) throws UnknownPersistenceException, InputDataValidationException
     {
         Set<ConstraintViolation<Reservation>>constraintViolations = validator.validate(newReservation);
         
@@ -155,33 +167,28 @@ public class ReservationSessionBean implements ReservationSessionBeanRemote, Res
             try
             {
                 em.persist(newReservation);
+                // Associate Room Type
                 RoomType rt = em.find(RoomType.class, roomTypeId);
-                Customer customer = em.find(Customer.class, customerId);
                 newReservation.setRoomType(rt);
                 rt.getReservations().add(newReservation);
-                newReservation.setCustomer(customer);
-                customer.getReservations().add(newReservation);
+                // Associate Room Rate
+                RoomRate rr = em.find(RoomRate.class, roomRateId);
+                newReservation.setRoomRate(rr);
+                rr.getReservations().add(newReservation);
+                // Associate Customer if applicable
+                if(customerId != null)
+                {
+                    Customer customer = em.find(Customer.class, customerId);
+                    newReservation.setCustomer(customer);
+                    customer.getReservations().add(newReservation);
+                }
                 em.flush();
 
                 return newReservation.getReservationId();
             }
             catch(PersistenceException ex)
             {
-                if(ex.getCause() != null && ex.getCause().getClass().getName().equals("org.eclipse.persistence.exceptions.DatabaseException"))
-                {
-                    if(ex.getCause().getCause() != null && ex.getCause().getCause().getClass().getName().equals("java.sql.SQLIntegrityConstraintViolationException"))
-                    {
-                        throw new ReservationExistsException();
-                    }
-                    else
-                    {
-                        throw new UnknownPersistenceException(ex.getMessage());
-                    }
-                }
-                else
-                {
-                    throw new UnknownPersistenceException(ex.getMessage());
-                }
+                throw new UnknownPersistenceException(ex.getMessage());
             }
         }
         else

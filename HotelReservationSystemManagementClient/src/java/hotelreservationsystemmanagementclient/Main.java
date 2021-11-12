@@ -36,5 +36,4 @@ public class Main {
         MainApp mainApp = new MainApp(employeeSessionBeanRemote, partnerSessionBeanRemote, roomTypeSessionBeanRemote, timerSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote, customerSessionBeanRemote, reservationSessionBeanRemote, allocationExceptionReportSessionBeanRemote);
         mainApp.runApp();
     }
-    
 }

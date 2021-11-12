@@ -7,7 +7,9 @@ package entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -17,9 +19,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import util.enumeration.PartnerAccessRight;
 import util.enumeration.RateType;
 
 @Entity
@@ -49,10 +51,17 @@ public class RoomRate implements Serializable {
     @JoinColumn(nullable = false)
     private RoomType roomType;
     
-    public RoomRate() {
+    @OneToMany(mappedBy = "roomRate")
+    private List<Reservation> reservations;
+    
+    public RoomRate()
+    {
+        this.reservations = new ArrayList<>();
     }
 
-    public RoomRate(String name, RateType rateType, BigDecimal ratePerNight, Date validityStartDate, Date validityEndDate, Boolean disabled) {
+    public RoomRate(String name, RateType rateType, BigDecimal ratePerNight, Date validityStartDate, Date validityEndDate, Boolean disabled)
+    {
+        this();
         this.name = name;
         this.rateType = rateType;
         this.ratePerNight = ratePerNight;
@@ -61,6 +70,14 @@ public class RoomRate implements Serializable {
         this.disabled = disabled;
     }
     
+    public RoomRate(String name, RateType rateType, BigDecimal ratePerNight)
+    {
+        this();
+        this.name = name;
+        this.rateType = rateType;
+        this.ratePerNight = ratePerNight;
+        this.disabled = false;
+    }
     
     
     public Long getRoomRateId() {
@@ -192,5 +209,13 @@ public class RoomRate implements Serializable {
      */
     public void setRoomType(RoomType roomType) {
         this.roomType = roomType;
+    }
+
+    public List<Reservation> getReservations() {
+        return reservations;
+    }
+
+    public void setReservations(List<Reservation> reservations) {
+        this.reservations = reservations;
     }
 }

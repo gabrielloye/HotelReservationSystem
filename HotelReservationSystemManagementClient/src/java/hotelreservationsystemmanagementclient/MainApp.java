@@ -85,6 +85,8 @@ public class MainApp
                 else if(response == 2)
                 {
                     timerSessionBeanRemote.useTimer();
+                    System.out.println("Timer Bean Invoked");
+                    response = 0;
                 }
                 else if(response == 3)
                 {
@@ -134,12 +136,12 @@ public class MainApp
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.OPERATIONMANAGER)
         {
-            hotelOperationModule = new HotelOperationModule(roomTypeSessionBeanRemote, roomSessionBeanRemote, allocationExceptionReportSessionBeanRemote);
+            hotelOperationModule = new HotelOperationModule(roomTypeSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote, allocationExceptionReportSessionBeanRemote);
             hotelOperationModule.operationManagerMenu();
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.SALESMANAGER)
         {
-            hotelOperationModule = new HotelOperationModule();
+            hotelOperationModule = new HotelOperationModule(roomTypeSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote, allocationExceptionReportSessionBeanRemote);
             hotelOperationModule.salesManagerMenu();
         }
         else if(currentEmployee.getAccessRight() == EmployeeAccessRight.GUESTRELATIONOFFICER)
