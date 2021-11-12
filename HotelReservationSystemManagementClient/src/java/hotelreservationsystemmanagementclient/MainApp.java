@@ -86,7 +86,6 @@ public class MainApp
                 {
                     timerSessionBeanRemote.useTimer();
                     System.out.println("Timer Bean Invoked");
-                    response = 0;
                 }
                 else if(response == 3)
                 {

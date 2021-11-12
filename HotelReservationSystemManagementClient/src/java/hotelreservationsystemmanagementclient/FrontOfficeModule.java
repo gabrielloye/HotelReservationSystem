@@ -108,34 +108,33 @@ public class FrontOfficeModule
         Scanner scanner = new Scanner(System.in);
         System.out.println("\n*** HoRS Management Client :: Front Office Menu :: Walk-in Search Room\n");
         
-        //arbituary dates initialised such that Start Date is after End Date
-        Date startDate = new Date(121, 11, 10); 
-        Date endDate = new Date(121, 11, 9);
-        while(startDate.after(endDate) || startDate.equals(endDate))
+        Date startDate = enterDate("Enter Check-in Date (dd/MM/yyyy)> ");
+        Date endDate = enterDate("Enter Check-out Date (dd/MM/yyyy)> ");
+        while(startDate.compareTo(endDate) >= 0)
         {
+            System.out.println("Invalid Start/End Date Range: Start date must be before end date");
             startDate = enterDate("Enter Check-in Date (dd/MM/yyyy)> ");
             endDate = enterDate("Enter Check-out Date (dd/MM/yyyy)> ");
-            if (startDate.after(endDate) || startDate.equals(endDate))
-            {
-                System.out.println("End Date must be after Start Date! Try Again!");
-            }
         }
+        
         long timeDiff = endDate.getTime() - startDate.getTime();
         BigDecimal numDays = new BigDecimal((timeDiff / (1000 * 60 * 60 * 24)));
-                
-        List<RoomType> availableRoomTypes = roomTypeSessionBeanRemote.retrieveAvailableRoomTypes(startDate);
         
+        System.out.print("Enter Number of Rooms Required> ");
+        Integer numRooms = scanner.nextInt();
+        scanner.nextLine();
+        
+        List<RoomType> availableRoomTypes = roomTypeSessionBeanRemote.retrieveAvailableRoomTypes(startDate, numRooms);
         if (!availableRoomTypes.isEmpty())
         {
+            Integer counter = 1;
             List<RoomRate> allRoomRates = new ArrayList<>();
-
-            for(int i = 0; i < availableRoomTypes.size(); i++)
+            for(RoomType roomType : availableRoomTypes)
             {
-                List<RoomRate> roomRates = availableRoomTypes.get(i).getRoomRates();
-
-                RoomRate pubRoomRate = getPublishedRoomRateFromList(roomRates);
+                RoomRate pubRoomRate = getPublishedRoomRateFromList(roomType.getRoomRates());
                 allRoomRates.add(pubRoomRate);
-                System.out.println((i+1) + ". " + availableRoomTypes.get(i).getName() + " - Amount : $" + pubRoomRate.getRatePerNight().multiply(numDays).toString());
+                System.out.println(counter + ". " + roomType.getName() + " - Amount : $" + pubRoomRate.getRatePerNight().multiply(numDays).multiply(new BigDecimal(numRooms)));
+                counter++;
             }
 
             Integer response = 0;
@@ -145,9 +144,11 @@ public class FrontOfficeModule
             {
                 if (anotherReservation.equals("Y"))
                 {
-                    for(int i = 0; i < availableRoomTypes.size(); i++)
+                    counter = 1;
+                    for(RoomType roomType : availableRoomTypes)
                     {
-                        System.out.println((i+1) + ". " + availableRoomTypes.get(i).getName() + " - Amount : $" + allRoomRates.get(i).getRatePerNight().multiply(numDays).toString());
+                        System.out.println(counter + ". " + roomType.getName() + " - Amount : $" + allRoomRates.get(counter - 1).getRatePerNight().multiply(numDays).multiply(new BigDecimal(numRooms)));
+                        counter++;
                     }
                 }
                 System.out.println("Would you like to reserve a room from this list?");
@@ -159,7 +160,7 @@ public class FrontOfficeModule
                 scanner.nextLine();
                 if(response == 1)
                 {
-                    Reservation newReservation = new Reservation(new Date(), startDate, endDate, 0, BigDecimal.valueOf(0.0), false, false);
+                    Reservation newReservation = new Reservation(new Date(), startDate, endDate, numRooms, BigDecimal.valueOf(0.0), false, false);
                     customerId = walkInReserveRoom(availableRoomTypes, allRoomRates, newReservation, customerId, numDays);
                     System.out.print("Would you like to reserve another room? Enter 'Y' if yes> ");
                     anotherReservation = scanner.nextLine().trim();
@@ -196,33 +197,12 @@ public class FrontOfficeModule
         }
         RoomType selectedRoomType = availableRoomTypes.get(selectedRoomTypeInt - 1);
         RoomRate selectedRoomRate = allRoomRates.get(selectedRoomTypeInt - 1);
-        int maxNumRooms = roomTypeSessionBeanRemote.getMaxNumRoomsForRoomType(selectedRoomType.getRoomTypeId());
-
-        Integer response = 0;
-        while (response < 1 || response > maxNumRooms)
-        {
-            System.out.println("How many rooms would you like to reserve?");
-            System.out.print("> ");
-            response = scanner.nextInt();
-            scanner.nextLine();
-
-            if(response < 1)
-            {
-                System.out.println("Invalid option, please try again!\n");
-            }
-
-            if(response > maxNumRooms)
-            {
-                System.out.println("Do not have enough rooms! Please enter a number less than " + maxNumRooms + "!\n");
-            }
-        }
         
         if(customerId.intValue() == 0) {
             customerId = checkExistingCustomer();
         }
 
-        BigDecimal numRooms = new BigDecimal(response);
-        newReservation.setNumRooms(response);
+        BigDecimal numRooms = new BigDecimal(newReservation.getNumRooms());
         newReservation.setPrice(selectedRoomRate.getRatePerNight().multiply(numDays).multiply(numRooms));
 
         try 

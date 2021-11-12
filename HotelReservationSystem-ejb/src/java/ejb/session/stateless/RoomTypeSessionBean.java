@@ -179,7 +179,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     }
     
     @Override
-    public List<RoomType> retrieveAvailableRoomTypes(Date startDate)
+    public List<RoomType> retrieveAvailableRoomTypes(Date startDate, Integer numRooms)
     {
         Query query = em.createQuery("SELECT DISTINCT rt FROM RoomType rt");
         List<RoomType> roomTypes = query.getResultList();
@@ -188,36 +188,56 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         
         for (RoomType rt : roomTypes)
         {
-            for (Room room : rt.getRooms()) 
+            int maxNumRooms = getMaxNumRoomsForRoomType(rt.getRoomTypeId());
+            int numRoomsAvailable = 0;
+            System.out.println("maxNumRooms " + maxNumRooms + "for Room Type " + rt.getName());
+            if (maxNumRooms >= numRooms)
             {
-                List<Reservation> roomReservations = room.getReservations();
-                if (!roomReservations.isEmpty()) 
+                for (Room room : rt.getRooms()) 
                 {
-                    boolean roomAllocated = false;
-                
-                    for (Reservation res : roomReservations)
+                    List<Reservation> roomReservations = room.getReservations();
+                    if (!roomReservations.isEmpty()) 
                     {
-                        if (res.getEndDate().after(startDate))
+                        boolean roomAllocated = false;
+
+                        for (Reservation res : roomReservations)
                         {
-                            roomAllocated = true;
+                            if (res.getEndDate().after(startDate))
+                            {
+                                roomAllocated = true;
+                                break;
+                            }
+                        }
+
+                        if (room.getAvailable() && !roomAllocated) 
+                        {
+                            numRoomsAvailable++;
+                            if (numRoomsAvailable == numRooms)
+                            {
+                                rt.getRoomRates().size();
+                                availableRoomTypes.add(rt);
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        numRoomsAvailable++;
+                        System.out.println("numRoomsAvailable " + numRoomsAvailable + "for Room Type " + rt.getName());
+                        if (numRoomsAvailable == numRooms)
+                        {
+                            rt.getRoomRates().size();
+                            availableRoomTypes.add(rt);
                             break;
                         }
                     }
-                    
-                    if (room.getAvailable() && !roomAllocated) 
-                    {
-                        rt.getRoomRates().size();
-                        availableRoomTypes.add(rt);
-                        break;
-                    }
-                }
-                else
-                {
-                    rt.getRoomRates().size();
-                    availableRoomTypes.add(rt);
-                    break;
                 }
             }
+        }
+        
+        for (RoomType rt : availableRoomTypes)
+        {
+            System.out.println(rt.getName());
         }
         
         return availableRoomTypes;

@@ -327,82 +327,82 @@ public class DataInitSessionBean {
             grandSuiteRoomType.getRooms().add(roomE);
             em.flush();
             
-            //test retrieve reservation by date
-            Reservation reservationA = new Reservation(new Date(), new Date(121, 10, 6), new Date(121, 10, 9), 3, BigDecimal.valueOf(900), false, false);
-            Customer customerA = new Customer(new Name("customer", "A"), "email1", Long.parseLong("9"));
-            em.persist(reservationA);
-            em.persist(customerA);
-            reservationA.setCustomer(customerA);
-            customerA.getReservations().add(reservationA);
-            reservationA.setRoomType(deluxeRoomType);
-            deluxeRoomType.getReservations().add(reservationA);
-            reservationA.setRoomRate(deluxeRoomPub);
-            deluxeRoomPub.getReservations().add(reservationA);
-            em.flush();
-            
-            //test upgraded and unavailable (expect 5x normal, 5x UPGRADED, 1x UNAVAILABLE)
-            Reservation reservationB = new Reservation(new Date(), new Date(121, 10, 12), new Date(121, 10, 14), 11, BigDecimal.valueOf(550), false, false);
-            Customer customerB = new Customer(new Name("customer", "B"), "email2", Long.parseLong("8"));
-            em.persist(reservationB);
-            em.persist(customerB);
-            reservationB.setCustomer(customerB);
-            customerB.getReservations().add(reservationB);
-            reservationB.setRoomType(deluxeRoomType);
-            deluxeRoomType.getReservations().add(reservationB);
-            reservationB.setRoomRate(deluxeRoomNorm);
-            deluxeRoomNorm.getReservations().add(reservationB);
-            em.flush();
-            
-            //test no higher roomtype (expect 5x normal, 1x UNAVAILABLE)
-            Reservation reservationD = new Reservation(new Date(), new Date(121, 10, 12), new Date(121, 10, 14), 6, BigDecimal.valueOf(3000), false, false);
-            Customer customerD = new Customer(new Name("customer", "D"), "email4", Long.parseLong("6"));
-            em.persist(reservationD);
-            em.persist(customerD);
-            reservationD.setCustomer(customerD);
-            customerD.getReservations().add(reservationD);
-            reservationD.setRoomType(grandSuiteRoomType);
-            grandSuiteRoomType.getReservations().add(reservationD);
-            reservationD.setRoomRate(grandSuitePub);
-            grandSuitePub.getReservations().add(reservationD);
-            em.flush();
-            
-            //test overlapping (expect UPGRADED x3)
-            Reservation reservationE = new Reservation(new Date(), new Date(121, 10, 12), new Date(121, 10, 14), 3, BigDecimal.valueOf(100), false, false);
-            Guest customerE = new Guest("guestone", "password", new Name("customer", "E"), "email5", Long.parseLong("5"));
-            em.persist(reservationE);
-            em.persist(customerE);
-            reservationE.setCustomer(customerE);
-            customerE.getReservations().add(reservationE);
-            reservationE.setRoomType(premierRoomType);
-            premierRoomType.getReservations().add(reservationE);
-            reservationE.setRoomRate(premierRoomNorm);
-            premierRoomNorm.getReservations().add(reservationE);
-            em.flush();
-            
-            //test overlapping (expect normal x 2)
-            Reservation reservationF = new Reservation(new Date(), new Date(121, 10, 12), new Date(121, 10, 14), 2, BigDecimal.valueOf(100), false, false);
-            em.persist(reservationF);
-            em.persist(customerE);
-            reservationF.setCustomer(customerE);
-            customerE.getReservations().add(reservationF);
-            reservationF.setRoomType(familyRoomType);
-            familyRoomType.getReservations().add(reservationF);
-            reservationF.setRoomRate(familyRoomPub);
-            familyRoomPub.getReservations().add(reservationF);
-            em.flush();
-            
-            //test retrieve reservation by date
-            Reservation reservationC = new Reservation(new Date(), new Date(121, 10, 9), new Date(121, 10, 9), 3, BigDecimal.valueOf(100), false, false);
-            Customer customerC = new Customer(new Name("customer", "C"), "email3", Long.parseLong("7"));
-            em.persist(reservationC);
-            em.persist(customerC);
-            reservationC.setCustomer(customerC);
-            customerC.getReservations().add(reservationC);
-            reservationC.setRoomType(deluxeRoomType);
-            deluxeRoomType.getReservations().add(reservationC);
-            reservationC.setRoomRate(deluxeRoomNorm);
-            deluxeRoomNorm.getReservations().add(reservationC);
-            em.flush();
+//            //test retrieve reservation by date
+//            Reservation reservationA = new Reservation(new Date(), new Date(121, 10, 6), new Date(121, 10, 9), 3, BigDecimal.valueOf(900), false, false);
+//            Customer customerA = new Customer(new Name("customer", "A"), "email1", Long.parseLong("9"));
+//            em.persist(reservationA);
+//            em.persist(customerA);
+//            reservationA.setCustomer(customerA);
+//            customerA.getReservations().add(reservationA);
+//            reservationA.setRoomType(deluxeRoomType);
+//            deluxeRoomType.getReservations().add(reservationA);
+//            reservationA.setRoomRate(deluxeRoomPub);
+//            deluxeRoomPub.getReservations().add(reservationA);
+//            em.flush();
+//            
+//            //test upgraded and unavailable (expect 5x normal, 5x UPGRADED, 1x UNAVAILABLE)
+//            Reservation reservationB = new Reservation(new Date(), new Date(121, 10, 12), new Date(121, 10, 14), 11, BigDecimal.valueOf(550), false, false);
+//            Customer customerB = new Customer(new Name("customer", "B"), "email2", Long.parseLong("8"));
+//            em.persist(reservationB);
+//            em.persist(customerB);
+//            reservationB.setCustomer(customerB);
+//            customerB.getReservations().add(reservationB);
+//            reservationB.setRoomType(deluxeRoomType);
+//            deluxeRoomType.getReservations().add(reservationB);
+//            reservationB.setRoomRate(deluxeRoomNorm);
+//            deluxeRoomNorm.getReservations().add(reservationB);
+//            em.flush();
+//            
+//            //test no higher roomtype (expect 5x normal, 1x UNAVAILABLE)
+//            Reservation reservationD = new Reservation(new Date(), new Date(121, 10, 12), new Date(121, 10, 14), 6, BigDecimal.valueOf(3000), false, false);
+//            Customer customerD = new Customer(new Name("customer", "D"), "email4", Long.parseLong("6"));
+//            em.persist(reservationD);
+//            em.persist(customerD);
+//            reservationD.setCustomer(customerD);
+//            customerD.getReservations().add(reservationD);
+//            reservationD.setRoomType(grandSuiteRoomType);
+//            grandSuiteRoomType.getReservations().add(reservationD);
+//            reservationD.setRoomRate(grandSuitePub);
+//            grandSuitePub.getReservations().add(reservationD);
+//            em.flush();
+//            
+//            //test overlapping (expect UPGRADED x3)
+//            Reservation reservationE = new Reservation(new Date(), new Date(121, 10, 12), new Date(121, 10, 14), 3, BigDecimal.valueOf(100), false, false);
+//            Guest customerE = new Guest("guestone", "password", new Name("customer", "E"), "email5", Long.parseLong("5"));
+//            em.persist(reservationE);
+//            em.persist(customerE);
+//            reservationE.setCustomer(customerE);
+//            customerE.getReservations().add(reservationE);
+//            reservationE.setRoomType(premierRoomType);
+//            premierRoomType.getReservations().add(reservationE);
+//            reservationE.setRoomRate(premierRoomNorm);
+//            premierRoomNorm.getReservations().add(reservationE);
+//            em.flush();
+//            
+//            //test overlapping (expect normal x 2)
+//            Reservation reservationF = new Reservation(new Date(), new Date(121, 10, 12), new Date(121, 10, 14), 2, BigDecimal.valueOf(100), false, false);
+//            em.persist(reservationF);
+//            em.persist(customerE);
+//            reservationF.setCustomer(customerE);
+//            customerE.getReservations().add(reservationF);
+//            reservationF.setRoomType(familyRoomType);
+//            familyRoomType.getReservations().add(reservationF);
+//            reservationF.setRoomRate(familyRoomPub);
+//            familyRoomPub.getReservations().add(reservationF);
+//            em.flush();
+//            
+//            //test retrieve reservation by date
+//            Reservation reservationC = new Reservation(new Date(), new Date(121, 10, 9), new Date(121, 10, 9), 3, BigDecimal.valueOf(100), false, false);
+//            Customer customerC = new Customer(new Name("customer", "C"), "email3", Long.parseLong("7"));
+//            em.persist(reservationC);
+//            em.persist(customerC);
+//            reservationC.setCustomer(customerC);
+//            customerC.getReservations().add(reservationC);
+//            reservationC.setRoomType(deluxeRoomType);
+//            deluxeRoomType.getReservations().add(reservationC);
+//            reservationC.setRoomRate(deluxeRoomNorm);
+//            deluxeRoomNorm.getReservations().add(reservationC);
+//            em.flush();
         }
     }
     

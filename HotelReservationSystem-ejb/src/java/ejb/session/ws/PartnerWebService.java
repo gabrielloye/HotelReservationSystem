@@ -52,7 +52,8 @@ public class PartnerWebService {
     @WebMethod(operationName = "retrieveAvailableRoomTypes")
     public List<RoomType> retrieveAvailableRoomTypes(@WebParam(name = "startDate") Date startDate)
     {
-        List<RoomType> roomTypes = roomTypeSessionBeanLocal.retrieveAvailableRoomTypes(startDate);
+        int numRooms = 1; //stub
+        List<RoomType> roomTypes = roomTypeSessionBeanLocal.retrieveAvailableRoomTypes(startDate, numRooms);
         for(RoomType roomType : roomTypes)
         {
             for(RoomRate roomRate : roomType.getRoomRates())
